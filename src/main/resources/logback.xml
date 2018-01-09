@@ -1,0 +1,21 @@
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <property name="appName" value="tequila"/>
+    <property name="pattern" value="%d %p [%t] %c{20} %m%n"/>
+
+    <appender name="ROOT-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${appName}.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_PATH}/${appName}.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <MaxHistory>3</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root>
+        <appender-ref ref="ROOT-APPENDER"/>
+    </root>
+</configuration>
