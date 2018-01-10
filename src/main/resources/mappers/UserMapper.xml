@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tequila.mapper.UserMapper">
+
+    <resultMap id="result" type="com.tequila.model.UserDO">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="mail" property="mail" jdbcType="VARCHAR"/>
+        <result column="token" property="token" jdbcType="VARCHAR"/>
+        <result column="token_expire" property="tokenExpire" jdbcType="TIMESTAMP"/>
+        <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP"/>
+        <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="columns">
+        id,name,phone,mail,token,token_expire,gmt_create,gmt_modified
+    </sql>
+
+    <insert id="insert" parameterType="com.tequila.model.UserDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tequila_user
+        (name,phone,mail,token,token_expire,gmt_create,gmt_modified)
+        VALUES
+        (
+          #{name},
+          #{phone},
+          #{mail},
+          #{token},
+          #{tokenExpire},
+          now(),
+          now()
+        )
+    </insert>
+
+    <select id="findById" parameterType="int" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_user
+        WHERE id=#{id}
+    </select>
+</mapper>

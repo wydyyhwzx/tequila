@@ -1,5 +1,7 @@
 package com.tequila.domain;
 
+import com.tequila.common.StatusCode;
+
 /**
  * Created by wangyudong on 2018/1/9.
  */
@@ -35,6 +37,13 @@ public class Result<T>{
         Result result = new Result(code);
         result.setMessage(message);
         result.setDescription(description);
+        return result;
+    }
+
+    public static <T> Result<T> fail(StatusCode statusCode) {
+        Result result = new Result(statusCode.getCode());
+        result.setMessage(statusCode.getMessage());
+        result.setDescription(statusCode.getDescription());
         return result;
     }
 
