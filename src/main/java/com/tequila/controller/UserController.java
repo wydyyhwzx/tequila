@@ -3,13 +3,13 @@ package com.tequila.controller;
 import com.tequila.common.Constants;
 import com.tequila.common.Md5Util;
 import com.tequila.common.StatusCode;
-import com.tequila.common.UserUtil;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
 import com.tequila.model.UserDO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,6 +30,8 @@ public class UserController {
 
     @Resource
     private UserMapper userMapper;
+    @Value("${host}")
+    private String host;
 
     @RequestMapping("/register")
     @ResponseBody
@@ -69,14 +71,14 @@ public class UserController {
     @RequestMapping("/test")
     @ResponseBody
     public Result<String> test(){
-        logger.info("user:" + UserUtil.getUser().getName());
         return Result.success("成功");
     }
 
     private void setCookie(HttpServletResponse response, String name, String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-     //   cookie.setDomain("tequila.com"); todo
+        if (StringUtils.isNotBlank(host) && !host.equals("localhost"))
+            cookie.setDomain(host);
         cookie.setPath("/");
         cookie.setMaxAge(Constants.expireSecond);
         cookie.setVersion(cookie.getVersion());
