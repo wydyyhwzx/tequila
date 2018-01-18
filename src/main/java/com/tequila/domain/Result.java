@@ -82,4 +82,17 @@ public class Result<T>{
     public void setResult(T result) {
         this.result = result;
     }
+
+    public byte[] toErrorByte() {
+        try {
+            return (START + code + MESSAGE + message + DESC + description + END).getBytes("UTF-8");
+        } catch (Exception e) {
+            return (START + code + MESSAGE + message + DESC + description + END).getBytes();
+        }
+    }
+
+    private static final String START = "{\"code\":";
+    private static final String MESSAGE = ",\"message\":\"";
+    private static final String DESC = "\",\"description\":\"";
+    private static final String END = "\"}";
 }
