@@ -6,6 +6,7 @@ import com.tequila.common.StatusCode;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
 import com.tequila.model.UserDO;
+import com.tequila.service.UserService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import java.util.Date;
 public class UserController {
     private static Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    @Resource
+    private UserService userService;
     @Resource
     private UserMapper userMapper;
     @Value("${host}")
@@ -62,6 +65,7 @@ public class UserController {
             return Result.fail(StatusCode.SYSTEM_ERROR);
         }
 
+        userService.sendRegisterMail(user);
         setCookie(response, Constants.uid, String.valueOf(user.getId()));
         setCookie(response, Constants.loginToken, user.getToken());
 
