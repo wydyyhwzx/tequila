@@ -1,5 +1,7 @@
 package com.tequila.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 /**
@@ -7,11 +9,62 @@ import java.util.Date;
  */
 public class UserDO {
     private Integer id;
+    /*
+    *  用户名
+    * */
     private String name;
+    /*
+    *  真实名称
+    * */
+    private String realName;
+    /*
+    *  手机号
+    * */
     private String phone;
+    /*
+    *  邮箱
+    * */
     private String mail;
+    /*
+    *  密码
+    * */
+    private String password;
+    /*
+    *  认证状态
+    * */
+    private Integer verifyStatus;
+    /*
+    *  会员类型
+    * */
+    private Integer memberType;
+    /*
+    *  证件类型
+    * */
+    private Integer cardType;
+    /*
+    *  证件号
+    * */
+    private String cardId;
+    /*
+    *  自媒体类型
+    * */
+    private Integer mediaType;
+    /*
+    *  自媒体ID
+    * */
+    private String mediaId;
+    /*
+    *  登录认证token
+    * */
     private String token;
+    /*
+    *  登录认证token到期时间
+    * */
     private Date tokenExpire;
+    /*
+    *  扩展字段，json格式
+    * */
+    private String extend;
     private Date gmtCreate;
     private Date gmtModified;
 
@@ -31,6 +84,14 @@ public class UserDO {
         this.name = name;
     }
 
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -46,7 +107,63 @@ public class UserDO {
     public void setMail(String mail) {
         this.mail = mail;
     }
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getVerifyStatus() {
+        return verifyStatus;
+    }
+
+    public void setVerifyStatus(Integer verifyStatus) {
+        this.verifyStatus = verifyStatus;
+    }
+
+    public Integer getMemberType() {
+        return memberType;
+    }
+
+    public void setMemberType(Integer memberType) {
+        this.memberType = memberType;
+    }
+
+    public Integer getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(Integer cardType) {
+        this.cardType = cardType;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getMediaId() {
+        return mediaId;
+    }
+
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
+    }
+
+    public Integer getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(Integer mediaType) {
+        this.mediaType = mediaType;
+    }
+    @JsonIgnore
     public String getToken() {
         return token;
     }
@@ -54,13 +171,21 @@ public class UserDO {
     public void setToken(String token) {
         this.token = token;
     }
-
+    @JsonIgnore
     public Date getTokenExpire() {
         return tokenExpire;
     }
 
     public void setTokenExpire(Date tokenExpire) {
         this.tokenExpire = tokenExpire;
+    }
+    @JsonIgnore
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend;
     }
 
     public Date getGmtCreate() {

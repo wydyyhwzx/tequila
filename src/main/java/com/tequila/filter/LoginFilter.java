@@ -76,9 +76,9 @@ public class LoginFilter implements Filter{
             int id = 0;
             String token = null;
             for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(Constants.uid))
+                if (cookie.getName().equals(Constants.uidCookie))
                     id = Integer.parseInt(cookie.getValue());
-                if (cookie.getName().equals(Constants.loginToken))
+                if (cookie.getName().equals(Constants.loginTokenCookie))
                     token = cookie.getValue();
             }
 
