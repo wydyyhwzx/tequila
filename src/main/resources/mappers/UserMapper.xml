@@ -58,4 +58,21 @@
         FROM tequila_user
         WHERE id=#{id}
     </select>
+
+    <select id="listByNameOrPhoneOrMail" parameterType="map" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_user
+        <where>
+            <if test="name != null and name !=''">
+                OR name = #{name}
+            </if>
+            <if test="phone != null and phone !=''">
+                OR phone = #{phone}
+            </if>
+            <if test="mail != null and mail !=''">
+                OR mail = #{mail}
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -11,7 +11,7 @@ public class Result<T>{
      */
     int code;
     /**
-     * 状态消息,开发人员使用
+     * 状态信息,开发人员使用
      */
     String message;
     /**

@@ -1,8 +1,6 @@
 package com.tequila.filter;
 
-import com.tequila.common.Constants;
-import com.tequila.common.StatusCode;
-import com.tequila.common.UserUtil;
+import com.tequila.common.*;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
 import com.tequila.model.UserDO;
@@ -15,7 +13,6 @@ import javax.annotation.Resource;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -73,16 +70,18 @@ public class LoginFilter implements Filter{
                 }
             }
 
-            int id = 0;
-            String token = null;
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(Constants.uidCookie))
-                    id = Integer.parseInt(cookie.getValue());
-                if (cookie.getName().equals(Constants.loginTokenCookie))
-                    token = cookie.getValue();
+            String stringId = CookieUtil.getValue(request, CookieEnum.UID);
+            if (StringUtils.isBlank(stringId)) {
+                sendError(response, StatusCode.LOGIN_ERROR);
+                return;
             }
-
-            if (id < 1 || StringUtils.isBlank(token)){
+            int id = Integer.parseInt(stringId);
+            if (id < 1){
+                sendError(response, StatusCode.LOGIN_ERROR);
+                return;
+            }
+            String token = CookieUtil.getValue(request, CookieEnum.LOGIN_TOKEN);
+            if (StringUtils.isBlank(token)){
                 sendError(response, StatusCode.LOGIN_ERROR);
                 return;
             }

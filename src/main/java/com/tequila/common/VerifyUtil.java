@@ -28,7 +28,7 @@ public class VerifyUtil {
             CacheBuilder
                     .newBuilder()
                     .maximumSize(100)
-                    .expireAfterWrite(Constants.verifyExpire, TimeUnit.SECONDS)
+                    .expireAfterWrite(CookieEnum.REGISTER_VERIFY.getExpire(), TimeUnit.SECONDS)
                     .build(new CacheLoader<String, String>() {
                         @Override
                         public String load(String key) throws Exception {
@@ -45,8 +45,8 @@ public class VerifyUtil {
         return verifyCode;
     }
 
-    public static boolean verifyCodeCheck(String uuid, String verifyCode) throws ExecutionException {
-        String localCode = uuidToVerifyCache.getIfPresent(uuid);
+    public static boolean verifyCodeCheck(String verifyCookie, String verifyCode) throws ExecutionException {
+        String localCode = uuidToVerifyCache.getIfPresent(verifyCookie);
         if (null == localCode)
             return false;
         if (localCode.equalsIgnoreCase(verifyCode))
