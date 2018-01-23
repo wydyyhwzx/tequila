@@ -2,6 +2,7 @@ package com.tequila.mapper;
 
 import com.tequila.model.UserDO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,5 +17,5 @@ public interface UserMapper {
 
     UserDO findById(Integer id);
 
-    List<UserDO> listByNameOrPhoneOrMail(String name, String phone, String mail);
+    List<UserDO> listByNameOrPhoneOrMail(@Param("name")String name, @Param("phone")String phone, @Param("mail")String mail);
 }

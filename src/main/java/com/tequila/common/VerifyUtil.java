@@ -40,8 +40,8 @@ public class VerifyUtil {
 
     public static Map<String,String> createVerifyCode()  throws ExecutionException{
         Map<String,String> verifyCode = new HashMap<>();
-        verifyCode.put("uuid", getUUid());
-        verifyCode.put("code", uuidToVerifyCache.get(verifyCode.get("uuid")));
+        verifyCode.put(Constants.rerifyUUIDKey, getUUid());
+        verifyCode.put(Constants.rerifyCodeKey, uuidToVerifyCache.get(verifyCode.get(Constants.rerifyUUIDKey)));
         return verifyCode;
     }
 

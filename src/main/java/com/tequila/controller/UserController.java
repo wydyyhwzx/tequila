@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by wangyudong on 2018/1/9.
@@ -82,13 +84,24 @@ public class UserController {
 
         CookieUtil.setCookie(response, CookieEnum.UID, String.valueOf(userDOResult.getResult().getId()), host, "/");
         CookieUtil.setCookie(response, CookieEnum.LOGIN_TOKEN, userDOResult.getResult().getToken(), host, "/");
+        CookieUtil.deleteCookie(response, CookieEnum.REGISTER_VERIFY, host, "/");
 
         return Result.success();
     }
 
-    @RequestMapping("/test")
+    @RequestMapping(value = "/getVerifyCode", method = RequestMethod.GET)
     @ResponseBody
-    public Result<String> test(){
-        return Result.success("成功");
+    public Result<Map<String,String>> getVerifyCode(@RequestParam int type, HttpServletResponse response) throws Exception{
+        Map<String,String> codeMap = VerifyUtil.createVerifyCode();
+        if (type == Constants.verifyRegisterType) {
+            CookieUtil.setCookie(response, CookieEnum.REGISTER_VERIFY, codeMap.get(Constants.rerifyUUIDKey), host, "/");
+            Map<String,String> result = new HashMap<>();
+            result.put(Constants.rerifyCodeKey, codeMap.get(Constants.rerifyCodeKey));
+            return Result.success(result);
+        }
+
+        Result result = Result.fail(StatusCode.PARAM_ERROR);
+        result.setDescription("验证码类型不对");
+        return result;
     }
 }

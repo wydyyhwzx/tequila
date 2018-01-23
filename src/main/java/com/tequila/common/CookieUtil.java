@@ -21,6 +21,16 @@ public class CookieUtil {
         response.addCookie(cookie);
     }
 
+    public static void deleteCookie(HttpServletResponse response, CookieEnum cookieEnum, String host, String path) {
+        Cookie cookie = new Cookie(cookieEnum.getKey(), null);
+        if (StringUtils.isNotBlank(host) && !host.equals("localhost"))
+            cookie.setDomain(host);
+        cookie.setPath(path);
+        cookie.setMaxAge(0);
+        cookie.setVersion(cookie.getVersion());
+        response.addCookie(cookie);
+    }
+
     public static String getValue(HttpServletRequest request, CookieEnum cookieEnum) {
         for (Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals(cookieEnum.getKey()))

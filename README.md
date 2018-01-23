@@ -39,3 +39,11 @@ confirm:重复确认密码
 verifyCode:验证码
 返回结果result：
 无
+
+3.4获取验证码接口
+url:/user/getVerifyCode
+method:GET
+参数:
+type:验证码类型，0 注册，1 登录，2 密码重置， 3 密码找回
+返回结果result：
+{"code":"Q69PGF"}

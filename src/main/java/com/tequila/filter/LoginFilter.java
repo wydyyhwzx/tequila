@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * 登录状态认证filter
  */
 @Order(2)
-@WebFilter(urlPatterns = "/*", initParams = {@WebInitParam(name="ignorePath",value="/user/login,/user/register")}, filterName = "loginFilter")
+@WebFilter(urlPatterns = "/*", initParams = {@WebInitParam(name="ignorePath",value="/user/login,/user/register,/user/getVerifyCode")}, filterName = "loginFilter")
 public class LoginFilter implements Filter{
     private static  final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
     private static final String IGNORE_PATH = "ignorePath";
