@@ -88,10 +88,10 @@ public class ValidatorUtil {
         return result;
     }
 
-    public static Result isPassword(String password) {
+    public static Result isPassword(String password, String name) {
         if (StringUtils.isBlank(password)) {
             Result result = Result.fail(StatusCode.PARAM_ERROR);
-            result.setDescription("密码不能为空");
+            result.setDescription(name + "不能为空");
             return result;
         }
         Matcher m = passwordPattern.matcher(password);
@@ -99,7 +99,7 @@ public class ValidatorUtil {
             return null;
 
         Result result = Result.fail(StatusCode.PARAM_ERROR);
-        result.setDescription("密码为6-15个字母／数字组合，请重新输入");
+        result.setDescription(name + "为6-15个字母／数字组合，请重新输入");
         return result;
     }
 

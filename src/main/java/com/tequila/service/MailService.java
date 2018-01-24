@@ -21,19 +21,18 @@ public class MailService {
     @Value("${spring.mail.username}")
     private String from;
 
-    public boolean sendRegisterMail(UserDO user) {
+    public boolean sendTextMail(String mail, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
-        message.setTo(user.getMail());
-        message.setSubject(user.getName() + "欢迎注册，请激活账号");
-        message.setText("http://localhost:8088/user/test");
+        message.setTo(mail);
+        message.setSubject(subject);
+        message.setText(text);
 
         try {
             mailSender.send(message);
-            logger.info("简单邮件已经发送。");
             return true;
         } catch (Exception e) {
-            logger.error("发送简单邮件时发生异常！", e);
+            logger.error("发送text邮件时发生异常,subject:" + subject, e);
         }
 
         return false;

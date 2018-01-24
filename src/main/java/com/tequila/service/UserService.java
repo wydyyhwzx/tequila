@@ -55,8 +55,50 @@ public class UserService {
         user.setTokenExpire(new Date(System.currentTimeMillis() + CookieEnum.LOGIN_TOKEN.getExpireLong()));
         user.setVerifyStatus(VerifyStatus.init.getCode());
         user.setMemberType(MemberType.normal.getCode());
-        transactionService.registerUser(user);
+        transactionService.registerUser(user, user.getName() + "，欢迎注册，请激活账号", "http://localhost:8088/user/test");
 
         return Result.success(user);
+    }
+
+    public Result<UserDO> login(String mail, String password) {
+        UserDO user = userMapper.findByMailAndPassWord(mail, password);
+        if (user == null){
+            Result result = Result.fail(StatusCode.PARAM_ERROR);
+            result.setDescription("密码不正确，请重新输入");
+            return result;
+        }
+
+        UserDO update = new UserDO();
+        update.setId(user.getId());
+        update.setToken(Md5Util.encryptMD5(mail, user.getPhone()));
+        update.setTokenExpire(new Date(System.currentTimeMillis() + CookieEnum.LOGIN_TOKEN.getExpireLong()));
+        userMapper.update(update);
+
+        return Result.success(user);
+    }
+
+    public Result resetPassword(String mail, String password, String newPassword) {
+        UserDO user = userMapper.findByMailAndPassWord(mail, password);
+        if (user == null){
+            Result result = Result.fail(StatusCode.PARAM_ERROR);
+            result.setDescription("原密码不正确，请重新输入");
+            return result;
+        }
+
+        UserDO update = new UserDO();
+        update.setId(user.getId());
+        update.setPassword(newPassword);
+        userMapper.update(update);
+
+        return Result.success(user);
+    }
+
+    public Result findPassword(UserDO user) {
+        String newPassword = VerifyUtil.getRandomString(8);
+        UserDO update = new UserDO();
+        update.setId(user.getId());
+        update.setPassword(newPassword);
+        transactionService.findPassword(update, user.getMail(), user.getName() + "，密码找回", "您的新密码为：" + newPassword + "，请尽快修改，以免密码泄漏");
+        return Result.success();
     }
 }

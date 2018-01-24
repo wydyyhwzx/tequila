@@ -6,7 +6,11 @@ package com.tequila.common;
 public enum CookieEnum {
     UID("uid", 30 * 24 * 60 * 60, 2592000000L),
     LOGIN_TOKEN("login_token", 30 * 24 * 60 * 60, 2592000000L),
-    REGISTER_VERIFY("register_code", 5 * 60, 300L);
+    REGISTER_VERIFY("register_code", 5 * 60, 300L),
+    LOGIN_VERIFY("login_code", 5 * 60, 300L),
+    RESET_PASSWORD_VERIFY("reset_code", 5 * 60, 300L),
+    FIND_PASSWORD_VERIFY("find_code", 5 * 60, 300L),
+    ;
 
     private String key;
     private int expire;

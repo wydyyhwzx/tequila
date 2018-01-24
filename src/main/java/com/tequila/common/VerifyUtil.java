@@ -4,9 +4,12 @@ package com.tequila.common;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.tequila.domain.Result;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -45,17 +48,29 @@ public class VerifyUtil {
         return verifyCode;
     }
 
-    public static boolean verifyCodeCheck(String verifyCookie, String verifyCode) throws ExecutionException {
-        String localCode = uuidToVerifyCache.getIfPresent(verifyCookie);
-        if (null == localCode)
-            return false;
-        if (localCode.equalsIgnoreCase(verifyCode))
-            return true;
+    public static Result verifyCodeCheck(HttpServletRequest request, CookieEnum cookieEnum, String verifyCode) throws ExecutionException {
+        Result result = ValidatorUtil.isVerifyCode(verifyCode);
+        if (null != result) {
+            return result;
+        }
+        String verifyCookie = CookieUtil.getValue(request, cookieEnum);
+        if (StringUtils.isBlank(verifyCookie)) {
+            result = Result.fail(StatusCode.PARAM_ERROR);
+            result.setDescription("验证码已过期，请刷新验证码");
+            return result;
+        }
 
-        return false;
+        String localCode = uuidToVerifyCache.getIfPresent(verifyCookie);
+        if (null == localCode || !localCode.equalsIgnoreCase(verifyCode)){
+            result = Result.fail(StatusCode.PARAM_ERROR);
+            result.setDescription("验证码不正确，请重新输入");
+            return result;
+        }
+
+        return null;
     }
 
-    private static String getRandomString(int size) {
+    public static String getRandomString(int size) {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<size; i++) {
             sb.append(chars[random.nextInt(chars.length)]);

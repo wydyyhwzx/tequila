@@ -15,7 +15,11 @@ import java.util.List;
 public interface UserMapper {
     void insert(UserDO user);
 
+    void update(UserDO user);
+
     UserDO findById(Integer id);
 
     List<UserDO> listByNameOrPhoneOrMail(@Param("name")String name, @Param("phone")String phone, @Param("mail")String mail);
+
+    UserDO findByMailAndPassWord(@Param("mail")String mail, @Param("password")String password);
 }

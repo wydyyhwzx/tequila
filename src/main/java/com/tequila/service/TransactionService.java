@@ -17,12 +17,22 @@ public class TransactionService {
     private MailService mailService;
 
     @Transactional(timeout = 30, rollbackFor = Throwable.class)
-    public void registerUser(UserDO user) {
+    public void registerUser(UserDO user, String subject, String text) {
         userMapper.insert(user);
 
-        boolean sucess = mailService.sendRegisterMail(user);
-        if (!sucess) {
-            throw new RuntimeException("sendRegisterMail error");
+        boolean success = mailService.sendTextMail(user.getMail(), subject, text);
+        if (!success) {
+            throw new RuntimeException("send registerMail error");
+        }
+    }
+
+    @Transactional(timeout = 30, rollbackFor = Throwable.class)
+    public void findPassword(UserDO user, String mail, String subject, String text) {
+        userMapper.update(user);
+
+        boolean success = mailService.sendTextMail(mail, subject, text);
+        if (!success) {
+            throw new RuntimeException("send findPassword error");
         }
     }
 }

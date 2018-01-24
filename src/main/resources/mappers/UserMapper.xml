@@ -52,6 +52,56 @@
         )
     </insert>
 
+    <update id="update" parameterType="com.tequila.model.UserDO">
+        update tequila_user
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="realName != null">
+                real_name = #{realName},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="mail != null">
+                mail = #{mail},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="verifyStatus != null">
+                verify_status = #{verifyStatus},
+            </if>
+            <if test="memberType != null">
+                member_type = #{memberType},
+            </if>
+            <if test="cardType != null">
+                card_type = #{cardType},
+            </if>
+            <if test="cardId != null">
+                card_id = #{cardId},
+            </if>
+            <if test="mediaType != null">
+                media_type = #{mediaType},
+            </if>
+            <if test="mediaId != null">
+                media_id = #{mediaId},
+            </if>
+            <if test="token != null">
+                token = #{token},
+            </if>
+            <if test="tokenExpire != null">
+                token_expire = #{tokenExpire},
+            </if>
+            <if test="extend != null">
+                extend = #{extend},
+            </if>
+            gmt_modified = now()
+        </set>
+        where id = #{id}
+    </update>
+
     <select id="findById" parameterType="int" resultMap="result">
         SELECT
         <include refid="columns"/>
@@ -74,5 +124,12 @@
                 OR mail = #{mail}
             </if>
         </where>
+    </select>
+
+    <select id="findByMailAndPassWord" parameterType="map" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_user
+        WHERE mail = #{mail} AND password = #{password}
     </select>
 </mapper>

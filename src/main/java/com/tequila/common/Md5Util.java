@@ -1,12 +1,14 @@
 package com.tequila.common;
 
 import java.security.MessageDigest;
+import java.util.Random;
 
 /**
  * Created by wangyudong on 2018/1/10.
  */
 public class Md5Util {
     private static String utfEncoding = "UTF-8";
+    private static Random random = new Random();
 
     public static String encryptMD5(String data, String secret) {
         try {
@@ -17,7 +19,7 @@ public class Md5Util {
             final byte[] dataDigest = md5.digest();
 
             md5.reset();
-            md5.update((byte2hex(dataDigest) + secret).getBytes(utfEncoding));
+            md5.update((byte2hex(dataDigest) + secret + random.nextInt(1000)).getBytes(utfEncoding));
 
             final byte[] allDigest = md5.digest();
             return byte2hex(allDigest);
