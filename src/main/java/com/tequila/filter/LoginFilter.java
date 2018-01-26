@@ -1,5 +1,6 @@
 package com.tequila.filter;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tequila.common.*;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
@@ -24,9 +25,9 @@ import java.util.regex.Pattern;
  * 登录状态认证filter
  */
 @Order(2)
-@WebFilter(urlPatterns = "/*", initParams = {@WebInitParam(name="ignorePath",value="/user/login,/user/register,/user/getVerifyCode")}, filterName = "loginFilter")
+@WebFilter(urlPatterns = "/*", initParams = {@WebInitParam(name="ignorePath",value="/user/login,/user/register,/user/getVerifyCode,/user/findPassword,/user/activate/*")}, filterName = "loginFilter")
 public class LoginFilter implements Filter{
-    private static  final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
     private static final String IGNORE_PATH = "ignorePath";
 
     @Resource
@@ -91,6 +92,14 @@ public class LoginFilter implements Filter{
                 sendError(response, StatusCode.LOGIN_ERROR);
                 return;
             }
+
+            ObjectNode extendJson = UserUtil.getExtendJson(user);
+            if (extendJson.has(Constants.extendActivateCode)) {
+                sendError(response, StatusCode.NO_ACTIVATE_ERROR);
+                return;
+            }
+            user.transformExtendToJson(extendJson);
+
             UserUtil.setUser(user);
             filterChain.doFilter(servletRequest, servletResponse);
         } catch (Exception e) {

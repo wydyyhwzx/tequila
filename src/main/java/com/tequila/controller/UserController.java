@@ -5,8 +5,6 @@ import com.tequila.domain.Result;
 import com.tequila.model.UserDO;
 import com.tequila.service.UserService;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private static Logger logger = LoggerFactory.getLogger(UserController.class);
-
     @Resource
     private UserService userService;
     @Value("${host}")
@@ -31,7 +27,7 @@ public class UserController {
 
     @RequestMapping(value = "/register"/*, method = RequestMethod.POST*/)
     @ResponseBody
-    public Result register(@RequestParam String name, @RequestParam String phone, @RequestParam String mail,
+    public Result<UserDO> register(@RequestParam String name, @RequestParam String phone, @RequestParam String mail,
                            @RequestParam String password, @RequestParam String confirm, @RequestParam String verifyCode,
                            HttpServletRequest request,HttpServletResponse response) throws Exception{
         Result result = ValidatorUtil.isUserName(name);
@@ -75,13 +71,28 @@ public class UserController {
         CookieUtil.setCookie(response, CookieEnum.LOGIN_TOKEN, userDOResult.getResult().getToken(), host, "/");
         CookieUtil.deleteCookie(response, CookieEnum.REGISTER_VERIFY, host, "/");
 
-        return Result.success();
+        return Result.success(userDOResult.getResult());
     }
+
+    @RequestMapping(value = "/activate/{mail}/{activateCode}", method = RequestMethod.GET)
+    @ResponseBody
+    public String activate(@PathVariable String mail, @PathVariable String activateCode) throws Exception{
+        Result result = ValidatorUtil.isEmail(mail);
+        if (null != result) {
+            return "激活链接不正确，请确认！";
+        }
+        if (StringUtils.isBlank(activateCode)) {
+            return "激活链接不正确，请确认！";
+        }
+
+        return userService.activate(mail, activateCode);
+    }
+
 
     @RequestMapping(value = "/login"/*, method = RequestMethod.POST*/)
     @ResponseBody
     public Result<UserDO> login(@RequestParam String mail, @RequestParam String password, @RequestParam String verifyCode,
-                           HttpServletRequest request,HttpServletResponse response) throws Exception{
+                           HttpServletRequest request,HttpServletResponse response) throws Exception {
         Result result = ValidatorUtil.isEmail(mail);
         if (null != result) {
             return result;
@@ -104,6 +115,15 @@ public class UserController {
         CookieUtil.setCookie(response, CookieEnum.UID, String.valueOf(userDOResult.getResult().getId()), host, "/");
         CookieUtil.setCookie(response, CookieEnum.LOGIN_TOKEN, userDOResult.getResult().getToken(), host, "/");
         CookieUtil.deleteCookie(response, CookieEnum.LOGIN_VERIFY, host, "/");
+
+        return Result.success(userDOResult.getResult());
+    }
+
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @ResponseBody
+    public Result logout(HttpServletResponse response) throws Exception {
+        CookieUtil.deleteCookie(response, CookieEnum.UID, host, "/");
+        CookieUtil.deleteCookie(response, CookieEnum.LOGIN_TOKEN, host, "/");
 
         return Result.success();
     }
@@ -147,15 +167,19 @@ public class UserController {
         return Result.success();
     }
 
-    @RequestMapping("/findPassword")
+    @RequestMapping(value = "/findPassword"/*, method = RequestMethod.POST*/)
     @ResponseBody
-    public Result findPassword(@RequestParam String verifyCode, HttpServletRequest request,HttpServletResponse response) throws Exception{
-        Result result = VerifyUtil.verifyCodeCheck(request, CookieEnum.FIND_PASSWORD_VERIFY, verifyCode);
+    public Result findPassword(@RequestParam String mail, @RequestParam String verifyCode, HttpServletRequest request,HttpServletResponse response) throws Exception{
+        Result result = ValidatorUtil.isEmail(mail);
+        if (null != result) {
+            return result;
+        }
+        result = VerifyUtil.verifyCodeCheck(request, CookieEnum.FIND_PASSWORD_VERIFY, verifyCode);
         if (null != result) {
             return result;
         }
 
-        Result resetResult = userService.findPassword(UserUtil.getUser());
+        Result resetResult = userService.findPassword(mail);
         if (resetResult.getCode() != 0) {
             result = Result.fail(resetResult.getCode(), resetResult.getMessage(), resetResult.getDescription());
             return result;
@@ -164,6 +188,12 @@ public class UserController {
         CookieUtil.deleteCookie(response, CookieEnum.FIND_PASSWORD_VERIFY, host, "/");
 
         return Result.success();
+    }
+
+    @RequestMapping(value ="/getUserInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<UserDO> getUserInfo() throws Exception{
+        return Result.success(UserUtil.getUser());
     }
 
     @RequestMapping(value = "/getVerifyCode", method = RequestMethod.GET)

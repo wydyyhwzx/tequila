@@ -1,6 +1,7 @@
 package com.tequila.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Date;
 
@@ -65,6 +66,8 @@ public class UserDO {
     *  扩展字段，json格式
     * */
     private String extend;
+    @JsonIgnore
+    private ObjectNode extendJson;
     private Date gmtCreate;
     private Date gmtModified;
 
@@ -186,6 +189,14 @@ public class UserDO {
 
     public void setExtend(String extend) {
         this.extend = extend;
+    }
+
+    public ObjectNode extendJsonVaule() {
+        return this.extendJson;
+    }
+
+    public void transformExtendToJson(ObjectNode extendJson) {
+        this.extendJson = extendJson;
     }
 
     public Date getGmtCreate() {

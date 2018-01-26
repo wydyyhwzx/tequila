@@ -8,6 +8,7 @@ public enum StatusCode {
     SYSTEM_ERROR(1, "SYSTEM ERROR", "系统错误，请稍后重试"),
     PARAM_ERROR(2, "PARAM ERROR", "参数错误"),
     LOGIN_ERROR(3, "LOGIN ERROR", "未登录，请先登录"),
+    NO_ACTIVATE_ERROR(4, "NO_ACTIVATE_ERROR", "账号未激活，请查看邮件，激活账号"),
     ;
 
     /**
