@@ -32,6 +32,8 @@ public class CookieUtil {
     }
 
     public static String getValue(HttpServletRequest request, CookieEnum cookieEnum) {
+        if (null == request.getCookies())
+            return null;
         for (Cookie cookie : request.getCookies()) {
             if (cookie.getName().equals(cookieEnum.getKey()))
                 return cookie.getValue();

@@ -2,18 +2,22 @@
 
 1启动
 1.1启动命令
+dev
 nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/Users/wangyudong/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/Users/wangyudong/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar tequila-1.0.0.jar --spring.profiles.active=dev >/Users/wangyudong/tequila/logs/start.log & 
-
+pro
+nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/home/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar /home/tequila/deploy/tequila-1.0.0.jar --spring.profiles.active=pro >/home/tequila/logs/start.log & 
 1.2启动配置修改
--Xloggc:/Users/wangyudong/tequila/logs/gc.log  gc日志文件路径修改为服务器具体日志路径
--XX:HeapDumpPath=/Users/wangyudong/tequila/logs/java.hprof  jvm进程宕机时内存状态文件路径修改为服务器具体日志路径
---spring.profiles.active=dev 环境修改为线上环境pro
+-Xloggc:/home/tequila/logs/gc.log  gc日志文件路径修改为服务器具体日志路径
+-XX:HeapDumpPath=/home/tequila/logs/java.hprof  jvm进程宕机时内存状态文件路径修改为服务器具体日志路径
+--spring.profiles.active=pro 环境修改为线上环境pro
+/home/tequila/logs/start.log 启动日志修改为服务器具体日志路径
+tequila-1.0.0.jar 修改为jar文件具体路径/home/tequila/deploy/tequila-1.0.0.jar
 
 2数据库
 2.1数据库名称
 tequila
 2.2用户表建表sql
-CREATE TABLE `tequila_user` (
+CCREATE TABLE `tequila_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime NOT NULL,
