@@ -12,6 +12,8 @@ nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m
 --spring.profiles.active=pro 环境修改为线上环境pro
 /home/tequila/logs/start.log 启动日志修改为服务器具体日志路径
 tequila-1.0.0.jar 修改为jar文件具体路径/home/tequila/deploy/tequila-1.0.0.jar
+1.3启动脚本
+tequila.sh
 
 2数据库
 2.1数据库名称
