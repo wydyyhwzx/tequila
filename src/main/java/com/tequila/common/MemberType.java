@@ -4,8 +4,9 @@ package com.tequila.common;
  * Created by wangyudong on 2018/1/23.
  */
 public enum MemberType {
-    normal(0, "普通会员"),
-    verify(1, "认证会员"),
+    free(0, "注册会员"),
+    normal(1, "普通会员"),
+    verify(2, "vip会员"),
     ;
 
     private int code;

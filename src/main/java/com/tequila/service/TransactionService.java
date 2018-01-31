@@ -17,13 +17,13 @@ public class TransactionService {
     private MailService mailService;
 
     @Transactional(timeout = 30, rollbackFor = Throwable.class)
-    public void registerUser(UserDO user, String subject, String html) {
+    public void registerUser(UserDO user/*, String subject, String html*/) {
         userMapper.insert(user);
 
-        boolean success = mailService.sendHtmlMail(user.getMail(), subject, html);
+        /*boolean success = mailService.sendHtmlMail(user.getMail(), subject, html);
         if (!success) {
             throw new RuntimeException("send registerMail error");
-        }
+        }*/
     }
 
     @Transactional(timeout = 30, rollbackFor = Throwable.class)

@@ -74,7 +74,7 @@ public class UserController {
         return Result.success(userDOResult.getResult());
     }
 
-    @RequestMapping(value = "/activate/{mail}/{activateCode}", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/activate/{mail}/{activateCode}", method = RequestMethod.GET)
     @ResponseBody
     public String activate(@PathVariable String mail, @PathVariable String activateCode) throws Exception{
         Result result = ValidatorUtil.isEmail(mail);
@@ -86,7 +86,7 @@ public class UserController {
         }
 
         return userService.activate(mail, activateCode);
-    }
+    }*/
 
 
     @RequestMapping(value = "/login"/*, method = RequestMethod.POST*/)

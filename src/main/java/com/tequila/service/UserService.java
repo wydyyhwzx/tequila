@@ -60,12 +60,12 @@ public class UserService {
         user.setToken(Md5Util.encryptMD5(mail, phone));
         user.setTokenExpire(new Date(System.currentTimeMillis() + CookieEnum.LOGIN_TOKEN.getExpireLong()));
         user.setVerifyStatus(VerifyStatus.init.getCode());
-        user.setMemberType(MemberType.normal.getCode());
-        String activateUUID = Md5Util.encryptMD5(name, mail + "activate");
+        user.setMemberType(MemberType.free.getCode());
+        /*String activateUUID = Md5Util.encryptMD5(name, mail + "activate");
         StringBuilder sb = new StringBuilder("{\"");
-        sb.append(Constants.extendActivateCode).append("\":\"").append(activateUUID).append("\"}");
-        user.setExtend(sb.toString());
-        StringBuilder html = new StringBuilder("<h1>");
+        sb.append(Constants.extendActivateCode).append("\":\"").append(activateUUID).append("\"}");*/
+        user.setExtend("{}");
+        /*StringBuilder html = new StringBuilder("<h1>");
         html.append(user.getName()).append(" 特此谨致问候").append("</h1>");
         html.append("<div><br></div>").append("<div>感谢您的注册，您现在可以激活账号，开始使用。</div>").append("<div><br></div>")
                 .append("<div><a href=\"http://").append(host);
@@ -73,13 +73,13 @@ public class UserService {
             html.append(":").append(port);
         html.append("/user/activate/").append(mail).append("/").append(activateUUID)
                 .append("\" target=\"_blank\" style=\"color: #007eb9; text-decoration: none; outline: none;\">")
-                .append("激活账号 »</a></div>");
-        transactionService.registerUser(user, "Tequila 注册确认", html.toString());
+                .append("激活账号 »</a></div>");*/
+        transactionService.registerUser(user/*, "Tequila 注册确认", html.toString()*/);
 
         return Result.success(user);
     }
 
-    public String activate(String mail, String activateCode) throws Exception{
+    /*public String activate(String mail, String activateCode) throws Exception{
         List<UserDO> userDOS = userMapper.listByNameOrPhoneOrMail(null, null, mail);
         if (userDOS == null || userDOS.size() != 1) {
             return "激活链接不正确，请确认！";
@@ -100,7 +100,7 @@ public class UserService {
         userMapper.update(update);
 
         return "激活成功，请在app中登录使用！";
-    }
+    }*/
 
     public Result<UserDO> login(String mail, String password) throws Exception{
         List<UserDO> userDOS = userMapper.listByNameOrPhoneOrMail(null, null, mail);
@@ -109,13 +109,13 @@ public class UserService {
             result.setDescription("邮箱不存在，请重新输入");
             return result;
         }
-        UserDO user = userDOS.get(0);
+        /*UserDO user = userDOS.get(0);
         ObjectNode extendJson = UserUtil.getExtendJson(user);
         if (extendJson.has(Constants.extendActivateCode)) {
             return Result.fail(StatusCode.NO_ACTIVATE_ERROR);
-        }
+        }*/
 
-        user = userMapper.findByMailAndPassWord(mail, password);
+        UserDO user = userMapper.findByMailAndPassWord(mail, password);
         if (user == null){
             Result result = Result.fail(StatusCode.PARAM_ERROR);
             result.setDescription("密码不正确，请重新输入");

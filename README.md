@@ -57,7 +57,6 @@ CCREATE TABLE `tequila_user` (
 1:系统错误
 2:参数错误
 3:未登录
-4:账号未激活
 
 3.3注册接口
 url:/user/register

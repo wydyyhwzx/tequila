@@ -94,10 +94,10 @@ public class LoginFilter implements Filter{
             }
 
             ObjectNode extendJson = UserUtil.getExtendJson(user);
-            if (extendJson.has(Constants.extendActivateCode)) {
+            /*if (extendJson.has(Constants.extendActivateCode)) {
                 sendError(response, StatusCode.NO_ACTIVATE_ERROR);
                 return;
-            }
+            }*/
             user.transformExtendToJson(extendJson);
 
             UserUtil.setUser(user);
