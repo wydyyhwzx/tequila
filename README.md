@@ -3,9 +3,9 @@
 1启动
 1.1启动命令
 dev
-nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/Users/wangyudong/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/Users/wangyudong/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar tequila-1.0.0.jar --spring.profiles.active=dev >/Users/wangyudong/tequila/logs/start.log & 
+nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/Users/wangyudong/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/Users/wangyudong/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar tequila-1.0.0.jar --spring.profiles.active=dev >/Users/wangyudong/tequila/logs/start.log 2>&1 &
 pro
-nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/home/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar /home/tequila/deploy/tequila-1.0.0.jar --spring.profiles.active=pro >/home/tequila/logs/start.log & 
+nohup java -server -Xms2g -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=256m -Xmn800m -XX:MaxDirectMemorySize=512m -XX:SurvivorRatio=8 -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+UseCMSCompactAtFullCollection -XX:CMSMaxAbortablePrecleanTime=5000 -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrent -XX:ParallelGCThreads=40 -Xloggc:/home/tequila/logs/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/tequila/logs/java.hprof -Dfile.encoding=UTF-8 -jar /home/tequila/deploy/tequila-1.0.0.jar --spring.profiles.active=pro >/home/tequila/logs/start.log 2>&1 &
 1.2启动配置修改
 -Xloggc:/home/tequila/logs/gc.log  gc日志文件路径修改为服务器具体日志路径
 -XX:HeapDumpPath=/home/tequila/logs/java.hprof  jvm进程宕机时内存状态文件路径修改为服务器具体日志路径
@@ -121,3 +121,21 @@ width:图片的宽度,不传默认160
 height:图片的高度，不传默认40
 返回结果result：
 异常或参数错误返回错误码和具体描述，正常返回验证码图片
+
+3.10关键词搜索列表接口
+url:/search/keyword/list
+method:GET
+参数:
+query:关键词
+page:页数，不传默认1
+返回结果result：
+list:[WechartArticle]
+
+3.11关键词搜索详情接口
+url:/search/keyword/info
+method:GET
+参数:
+url:详情页url地址
+返回结果result：
+抓取是否返回错误码 1:系统错误
+成功返回详情html 设置响应头：Content-Type: text/html; charset=UTF-8

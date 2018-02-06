@@ -1,5 +1,6 @@
 package com.tequila.common;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -17,28 +18,36 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by wangyudong on 2018/1/31.
  */
+
 public class HtmlUtils {
     private static Logger logger = LoggerFactory.getLogger(HtmlUtils.class);
     private static final String UTF8 = "utf-8";
-    private static Map<String,Integer> proxy = new ConcurrentHashMap<>();
+    private static List<IpPort> proxy = Lists.newCopyOnWriteArrayList();
+    private static AtomicInteger index = new AtomicInteger(0);
 
     static {
-        proxy.put("219.149.46.151", 3129);
+        List<IpPort> temp = new ArrayList<>();
+        temp.add(new IpPort("219.149.46.151", 3129));
+        proxy.addAll(temp);
     }
 
     public static String getHtml(String url, Map<String,String> parameters) throws IOException {
         String html = "";
         CloseableHttpClient httpClient = HttpClients.createDefault();// 创建httpClient对象
         HttpGet httpget = new HttpGet(composeTargetUrl(url, parameters));
-        HttpHost proxy=new HttpHost("219.149.46.151", 3129);
+        HttpHost httpProxy = new HttpHost("219.149.46.151", 3129);
+        /*IpPort ipPort = proxy.get(index.getAndSet((index.intValue() + 1) % proxy.size()));
+        httpProxy = new HttpHost(ipPort.getIp(), ipPort.getPort());*/
         RequestConfig requestConfig = RequestConfig.custom()
-                .setProxy(proxy)
+                .setProxy(httpProxy)
                 .setSocketTimeout(3000)
                 .setConnectTimeout(3000)
                 .setConnectionRequestTimeout(3000)
@@ -76,25 +85,6 @@ public class HtmlUtils {
         return html;
     }
 
-    /**
-     * 修改代理ip
-     *
-     * @param ip
-     * @param port
-     * @param type
-     *            0：新增， 1：删除
-     */
-    public static void modifyProxy(String ip, Integer port, int type) {
-        if (type == 0) {
-            proxy.put(ip, port);
-            return;
-        }
-
-        if (type == 1) {
-            proxy.remove(ip);
-        }
-    }
-
     private static String composeTargetUrl(String url, Map<String,String> parameters) {
         if (null == parameters || parameters.size() == 0)
             return url;
@@ -123,4 +113,30 @@ public class HtmlUtils {
         return stringBuilder.substring(0, stringBuilder.length() - 1);
     }
 
+}
+
+class IpPort {
+    private String ip;
+    private int port;
+
+    IpPort(String ip, int port) {
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

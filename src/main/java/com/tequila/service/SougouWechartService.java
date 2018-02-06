@@ -5,17 +5,20 @@ import java.util.*;
 
 import com.tequila.common.HtmlUtils;
 import com.tequila.domain.WechartArticle;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by wangyudong on 2018/1/31.
  * 搜狗微信
  */
+@Component
 public class SougouWechartService {
     private static Logger logger = LoggerFactory.getLogger(SougouWechartService.class);
     private static final String sogouUrl = "http://weixin.sogou.com/weixin";
@@ -44,8 +47,10 @@ public class SougouWechartService {
             parameters = createParamters(query, page);
         }
 
-        HtmlUtils htmlUtil = new HtmlUtils();
-        String sougouWechatHtml = htmlUtil.getHtml(sogouUrl, parameters);
+        String sougouWechatHtml = HtmlUtils.getHtml(sogouUrl, parameters);
+        if (StringUtils.isBlank(sougouWechatHtml)) {
+            return getArticleList(query, page, parameters, retryNum + 1);
+        }
         Document sougouWechatDoc = Jsoup.parse(sougouWechatHtml);
 
         Element newsList = sougouWechatDoc.selectFirst(".news-box ul.news-list");
@@ -82,27 +87,27 @@ public class SougouWechartService {
      *
      * @param url
      *            请求地址
-     * @return 微信文章
+     * @return 微信文章html
      * @throws IOException
      */
-    public WechartArticle getWechartArticle(String url) throws IOException {
-        HtmlUtils htmlUtil = new HtmlUtils();
-        String wechartArticleHtml = htmlUtil.getHtml(url, null);
+    public String getArticleHtml(String url, int retryNum) throws IOException {
+        if (retryNum > maxRetryNum) {
+            logger.info("[SougouWechartService] getArticleHtml retryNum > {}, url:{}", maxRetryNum, url);
+            return null;
+        }
+
+        String wechartArticleHtml = HtmlUtils.getHtml(url, null);
+        if (StringUtils.isBlank(wechartArticleHtml)) {
+            return getArticleHtml(url, retryNum + 1);
+        }
 
         Document wechartArticlDoc = Jsoup.parse(wechartArticleHtml);
-        Elements tittle = wechartArticlDoc.select(".rich_media_title");
-        Element author = wechartArticlDoc.select(".rich_media_meta.rich_media_meta_text").get(1);
-        Elements time = wechartArticlDoc.select(".rich_media_meta.rich_media_meta_text#post-date");
-        Elements content = wechartArticlDoc.select(".rich_media_content#js_content");
-        String alterContent = content.html().replace("data-src", "src");// 将属性data-src替换为src，否则图片不能正常显示
-        Elements nickName = wechartArticlDoc.select(".rich_media_meta.rich_media_meta_text.rich_media_meta_nickname");
-
-        WechartArticle wechartArticle = new WechartArticle(url, tittle.text());
-        wechartArticle.setAuthor(author.text());
-        wechartArticle.setTime(time.text());
-        wechartArticle.setNickName(nickName.text());
-        wechartArticle.setContent(alterContent);
-        return wechartArticle;
+        Elements content = wechartArticlDoc.select(".rich_media#js_article");
+        if (null == content || content.size() == 0) {
+            return getArticleHtml(url, retryNum + 1);
+        }
+        String alterContent = wechartArticlDoc.html().replaceAll("data-src", "src");// 将属性data-src替换为src，否则图片不能正常显示
+        return alterContent;
     }
 
     private Map<String,String> createParamters(String query, int page) {
@@ -131,7 +136,7 @@ public class SougouWechartService {
             System.out.println(wechartArticle.toString());
             System.out.println();
         }*/
-        WechartArticle article = sougouWechartService.getWechartArticle("http://mp.weixin.qq.com/s?src=3&timestamp=1517821753&ver=1&signature=lgOWtvIEX71GseKByfGlshoPv16Fde6gdE168eUn65v9M7-bDqDzoyKMjD7NquJfXtLyJtXvS9RuplDHiiz9Y92kXN0dgg6R2dOFscpAatojucaYrAWCyMIlpCZ0bi8*4qzJiQd4fIr4O3VPxqeqO5cDLByDYcITgUPVCFHQRQM=");
-        System.out.println(article.toString());
+        String article = sougouWechartService.getArticleHtml("http://mp.weixin.qq.com/s?src=11&timestamp=1517902182&ver=681&signature=kntb0nqHRT0mNi9YI0pjKGPJ*somPS6Q3y8OQ0MwbhiN*iwbsQBTmMTjwAxENOCoypLfrVNoJHEveD8Exemevhxyg6TENwreK22C**B8L96oS7JRsr-Tyaa4DFtOvJ6I&new=1", 0);
+        System.out.println(article == null ? "null" : article);
     }
 }

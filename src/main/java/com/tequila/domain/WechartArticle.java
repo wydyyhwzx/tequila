@@ -5,12 +5,29 @@ package com.tequila.domain;
  * 微信文章
  */
 public class WechartArticle {
+    /*
+    * 详情页地址
+    * */
     private String url;
+    /*
+    * 标题
+    * */
     private String tittle;
-    private String author;      //作者
+    /*
+    * 发布时间
+    * */
     private String time;
-    private String nickName;  //公众号昵称
+    /*
+    * 公众号昵称
+    * */
+    private String nickName;
+    /*
+    * 内容概述
+    * */
     private String content;
+    /*
+    * 首图，可能没有
+    * */
     private String img;
 
     public WechartArticle() {
@@ -36,14 +53,6 @@ public class WechartArticle {
 
     public void setTittle(String tittle) {
         this.tittle = tittle;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     public String getTime() {
@@ -83,7 +92,6 @@ public class WechartArticle {
         return "WechartArticle{" +
                 "url='" + url + '\'' +
                 ", tittle='" + tittle + '\'' +
-                ", author='" + author + '\'' +
                 ", time='" + time + '\'' +
                 ", nickName='" + nickName + '\'' +
                 ", content='" + content + '\'' +
