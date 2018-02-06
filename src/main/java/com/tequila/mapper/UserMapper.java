@@ -21,5 +21,5 @@ public interface UserMapper {
 
     List<UserDO> listByNameOrPhoneOrMail(@Param("name")String name, @Param("phone")String phone, @Param("mail")String mail);
 
-    UserDO findByMailAndPassWord(@Param("mail")String mail, @Param("password")String password);
+    UserDO findByPhoneAndPassWord(@Param("phone")String phone, @Param("password")String password);
 }

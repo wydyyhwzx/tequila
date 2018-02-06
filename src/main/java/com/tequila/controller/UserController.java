@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +24,7 @@ public class UserController {
     @Value("${host}")
     private String host;
 
-    @RequestMapping(value = "/register"/*, method = RequestMethod.POST*/)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
     public Result<UserDO> register(@RequestParam String name, @RequestParam String phone, @RequestParam String mail,
                            @RequestParam String password, @RequestParam String confirm, @RequestParam String verifyCode,
@@ -89,11 +88,11 @@ public class UserController {
     }*/
 
 
-    @RequestMapping(value = "/login"/*, method = RequestMethod.POST*/)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public Result<UserDO> login(@RequestParam String mail, @RequestParam String password, @RequestParam String verifyCode,
+    public Result<UserDO> login(@RequestParam String phone, @RequestParam String password, @RequestParam String verifyCode,
                            HttpServletRequest request,HttpServletResponse response) throws Exception {
-        Result result = ValidatorUtil.isEmail(mail);
+        Result result = ValidatorUtil.isMobile(phone);
         if (null != result) {
             return result;
         }
@@ -106,7 +105,7 @@ public class UserController {
             return result;
         }
 
-        Result<UserDO> userDOResult = userService.login(mail, password);
+        Result<UserDO> userDOResult = userService.login(phone, password);
         if (userDOResult.getCode() != 0) {
             result = Result.fail(userDOResult.getCode(), userDOResult.getMessage(), userDOResult.getDescription());
             return result;
@@ -128,7 +127,7 @@ public class UserController {
         return Result.success();
     }
 
-    @RequestMapping(value = "/resetPassword"/*, method = RequestMethod.POST*/)
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     @ResponseBody
     public Result resetPassword(@RequestParam String password, @RequestParam String newPassword,
                                 @RequestParam String confirm, @RequestParam String verifyCode,
@@ -156,7 +155,7 @@ public class UserController {
             return result;
         }
 
-        Result resetResult = userService.resetPassword(UserUtil.getUser().getMail(), password, newPassword);
+        Result resetResult = userService.resetPassword(UserUtil.getUser().getPhone(), password, newPassword);
         if (resetResult.getCode() != 0) {
             result = Result.fail(resetResult.getCode(), resetResult.getMessage(), resetResult.getDescription());
             return result;
@@ -167,7 +166,7 @@ public class UserController {
         return Result.success();
     }
 
-    @RequestMapping(value = "/findPassword"/*, method = RequestMethod.POST*/)
+    @RequestMapping(value = "/findPassword", method = RequestMethod.POST)
     @ResponseBody
     public Result findPassword(@RequestParam String mail, @RequestParam String verifyCode, HttpServletRequest request,HttpServletResponse response) throws Exception{
         Result result = ValidatorUtil.isEmail(mail);
@@ -198,14 +197,20 @@ public class UserController {
 
     @RequestMapping(value = "/getVerifyCode", method = RequestMethod.GET)
     @ResponseBody
-    public Result<Map<String,String>> getVerifyCode(@RequestParam int type, HttpServletResponse response) throws Exception{
-        Map<String,String> codeMap = VerifyUtil.createVerifyCode();
+    public Result getVerifyCode(@RequestParam int type, @RequestParam(required = false, defaultValue = "160") int width, @RequestParam(required = false, defaultValue = "40") int height,
+                                HttpServletResponse response) throws Exception{
         for (VerifyCodeType codeType : VerifyCodeType.values()) {
             if (type == codeType.getCode()) {
+                Map<String,String> codeMap = VerifyUtil.createVerifyCode();
                 CookieUtil.setCookie(response, codeType.getCookieEnum(), codeMap.get(Constants.rerifyUUIDKey), host, "/");
-                Map<String,String> result = new HashMap<>();
-                result.put(Constants.rerifyCodeKey, codeMap.get(Constants.rerifyCodeKey));
-                return Result.success(result);
+                // 设置响应的类型格式为图片格式
+                response.setContentType("image/jpeg");
+                //禁止图像缓存。
+                response.setHeader("Pragma", "no-cache");
+                response.setHeader("Cache-Control", "no-cache");
+                response.setDateHeader("Expires", 0);
+                VerifyUtil.writeCode(response.getOutputStream(), codeMap.get(Constants.rerifyCodeKey), width, height);
+                return null;
             }
         }
 

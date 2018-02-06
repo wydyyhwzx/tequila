@@ -1,6 +1,5 @@
 package com.tequila.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tequila.common.*;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
@@ -102,11 +101,11 @@ public class UserService {
         return "激活成功，请在app中登录使用！";
     }*/
 
-    public Result<UserDO> login(String mail, String password) throws Exception{
-        List<UserDO> userDOS = userMapper.listByNameOrPhoneOrMail(null, null, mail);
+    public Result<UserDO> login(String phone, String password) throws Exception{
+        List<UserDO> userDOS = userMapper.listByNameOrPhoneOrMail(null, phone, null);
         if (userDOS == null || userDOS.size() != 1) {
             Result result = Result.fail(StatusCode.PARAM_ERROR);
-            result.setDescription("邮箱不存在，请重新输入");
+            result.setDescription("手机号不存在，请重新输入");
             return result;
         }
         /*UserDO user = userDOS.get(0);
@@ -115,7 +114,7 @@ public class UserService {
             return Result.fail(StatusCode.NO_ACTIVATE_ERROR);
         }*/
 
-        UserDO user = userMapper.findByMailAndPassWord(mail, password);
+        UserDO user = userMapper.findByPhoneAndPassWord(phone, password);
         if (user == null){
             Result result = Result.fail(StatusCode.PARAM_ERROR);
             result.setDescription("密码不正确，请重新输入");
@@ -124,7 +123,7 @@ public class UserService {
 
         UserDO update = new UserDO();
         update.setId(user.getId());
-        update.setToken(Md5Util.encryptMD5(mail, user.getPhone()));
+        update.setToken(Md5Util.encryptMD5(user.getMail(), phone));
         update.setTokenExpire(new Date(System.currentTimeMillis() + CookieEnum.LOGIN_TOKEN.getExpireLong()));
         userMapper.update(update);
 
@@ -132,8 +131,8 @@ public class UserService {
         return Result.success(user);
     }
 
-    public Result resetPassword(String mail, String password, String newPassword) {
-        UserDO user = userMapper.findByMailAndPassWord(mail, password);
+    public Result resetPassword(String phone, String password, String newPassword) {
+        UserDO user = userMapper.findByPhoneAndPassWord(phone, password);
         if (user == null){
             Result result = Result.fail(StatusCode.PARAM_ERROR);
             result.setDescription("原密码不正确，请重新输入");

@@ -126,10 +126,10 @@
         </where>
     </select>
 
-    <select id="findByMailAndPassWord" parameterType="map" resultMap="result">
+    <select id="findByPhoneAndPassWord" parameterType="map" resultMap="result">
         SELECT
         <include refid="columns"/>
         FROM tequila_user
-        WHERE mail = #{mail} AND password = #{password}
+        WHERE phone = #{phone} AND password = #{password}
     </select>
 </mapper>

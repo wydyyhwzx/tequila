@@ -75,7 +75,7 @@ UserDO
 url:/user/login
 method:POST
 参数:
-mail:邮箱
+phone:手机号
 password:密码
 verifyCode:验证码
 返回结果result：
@@ -117,5 +117,7 @@ url:/user/getVerifyCode
 method:GET
 参数:
 type:验证码类型，0 注册，1 登录，2 密码重置， 3 密码找回
+width:图片的宽度,不传默认160
+height:图片的高度，不传默认40
 返回结果result：
-{"code":"Q69PGF"}
+异常或参数错误返回错误码和具体描述，正常返回验证码图片
