@@ -2,8 +2,10 @@ package com.tequila.controller;
 
 import com.tequila.common.Constants;
 import com.tequila.common.StatusCode;
+import com.tequila.common.UserUtil;
 import com.tequila.domain.Result;
 import com.tequila.domain.WechartArticle;
+import com.tequila.model.UserDO;
 import com.tequila.service.SougouWechartService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +50,16 @@ public class SearchController {
         out.write(articleHtml.getBytes(Constants.UTF8));
         out.flush();
         return null;
+    }
+
+    @RequestMapping(value = "/setProxy", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<Boolean> setProxy(@RequestParam String ip, @RequestParam int port, @RequestParam int type) throws Exception {
+        UserDO userDO = UserUtil.getUser();
+        if (null == userDO || !Constants.MANAGER_PHONES.contains(userDO.getPhone())) {
+            return Result.fail(StatusCode.NO_ACCESS_ERROR);
+        }
+
+        return Result.success(sougouWechartService.setProxy(ip, port, type));
     }
 }

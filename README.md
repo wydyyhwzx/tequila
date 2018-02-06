@@ -57,6 +57,7 @@ CCREATE TABLE `tequila_user` (
 1:系统错误
 2:参数错误
 3:未登录
+4:没有访问权限
 
 3.3注册接口
 url:/user/register
@@ -139,3 +140,12 @@ url:详情页url地址
 返回结果result：
 抓取是否返回错误码 1:系统错误
 成功返回详情html 设置响应头：Content-Type: text/html; charset=UTF-8
+
+3.12设置高匿代理接口 设置权限登录用户的手机号在白名单里才可用，目前是写死了我的手机号，没放数据库
+url:/search/setProxy
+method:GET
+参数:
+ip:代理ip
+port:代理port
+type:类型 0：新增代理， 1：删除代理
+返回结果result：

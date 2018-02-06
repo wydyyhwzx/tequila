@@ -129,14 +129,23 @@ public class SougouWechartService {
         return parameters;
     }
 
+    public boolean setProxy(String ip, int port, int type) {
+        try {
+            return HtmlUtils.setProxy(ip, port, type);
+        } catch (Exception e) {
+            logger.error("[SougouWechartService] setProxy err. ip:" + ip + ",port:" + port, "type:" + type, e);
+        }
+        return false;
+    }
+
     public static void main(String[] args) throws Exception{
         SougouWechartService sougouWechartService = new SougouWechartService();
-        /*List<WechartArticle> list = sougouWechartService.getArticleList("张靓颖", 1, null, 0);
+        List<WechartArticle> list = sougouWechartService.getArticleList("张靓颖", 1, null, 0);
         for (WechartArticle wechartArticle: list) {
             System.out.println(wechartArticle.toString());
             System.out.println();
-        }*/
-        String article = sougouWechartService.getArticleHtml("http://mp.weixin.qq.com/s?src=11&timestamp=1517902182&ver=681&signature=kntb0nqHRT0mNi9YI0pjKGPJ*somPS6Q3y8OQ0MwbhiN*iwbsQBTmMTjwAxENOCoypLfrVNoJHEveD8Exemevhxyg6TENwreK22C**B8L96oS7JRsr-Tyaa4DFtOvJ6I&new=1", 0);
-        System.out.println(article == null ? "null" : article);
+        }
+        /*String article = sougouWechartService.getArticleHtml("http://mp.weixin.qq.com/s?src=11&timestamp=1517902182&ver=681&signature=kntb0nqHRT0mNi9YI0pjKGPJ*somPS6Q3y8OQ0MwbhiN*iwbsQBTmMTjwAxENOCoypLfrVNoJHEveD8Exemevhxyg6TENwreK22C**B8L96oS7JRsr-Tyaa4DFtOvJ6I&new=1", 0);
+        System.out.println(article == null ? "null" : article);*/
     }
 }

@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,10 +33,27 @@ public class HtmlUtils {
     private static final String UTF8 = "utf-8";
     private static List<IpPort> proxy = Lists.newCopyOnWriteArrayList();
     private static AtomicInteger index = new AtomicInteger(0);
+    private static Map<IpPort,Integer> failSize = new ConcurrentHashMap<>();
+    private static final int maxFail = 30;
+    private static final int maxFailSize = 1000;
+
 
     static {
         List<IpPort> temp = new ArrayList<>();
         temp.add(new IpPort("219.149.46.151", 3129));
+        temp.add(new IpPort("101.4.136.34", 81));
+        temp.add(new IpPort("116.199.115.78", 82));
+        temp.add(new IpPort("14.215.177.73", 80));
+        temp.add(new IpPort("121.8.98.197", 80));
+        temp.add(new IpPort("121.8.98.198", 80));
+        temp.add(new IpPort("47.52.222.165", 80));
+        temp.add(new IpPort("113.207.42.103", 80));
+        temp.add(new IpPort("121.40.108.76", 80));
+        temp.add(new IpPort("39.137.83.131", 8080));
+        temp.add(new IpPort("118.114.77.47", 8080));
+        temp.add(new IpPort("39.134.240.135", 8080));
+        temp.add(new IpPort("61.134.29.13", 8080));
+        temp.add(new IpPort("180.118.242.42", 61234));
         proxy.addAll(temp);
     }
 
@@ -43,15 +61,22 @@ public class HtmlUtils {
         String html = "";
         CloseableHttpClient httpClient = HttpClients.createDefault();// 创建httpClient对象
         HttpGet httpget = new HttpGet(composeTargetUrl(url, parameters));
-        HttpHost httpProxy = new HttpHost("219.149.46.151", 3129);
-        /*IpPort ipPort = proxy.get(index.getAndSet((index.intValue() + 1) % proxy.size()));
-        httpProxy = new HttpHost(ipPort.getIp(), ipPort.getPort());*/
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setProxy(httpProxy)
+
+        IpPort ipPort = null;
+        RequestConfig.Builder builder = RequestConfig.custom();
+        if (proxy.size() > 0) {
+            int i = index.get() % proxy.size();
+            index.set(i + 1);
+            ipPort = proxy.get(i);
+            HttpHost httpProxy = new HttpHost(ipPort.getIp(), ipPort.getPort());
+            builder.setProxy(httpProxy);
+        }
+        RequestConfig requestConfig = builder
                 .setSocketTimeout(3000)
                 .setConnectTimeout(3000)
                 .setConnectionRequestTimeout(3000)
                 .build();
+
         httpget.setConfig(requestConfig);
         httpget.setHeader("Referer", "http://weixin.sogou.com/weixin?oq=&query=%E6%9D%8E%E5%AE%87%E6%98%A5&_sug_type_=&sut=596&lkt=1%2C1517560265583%2C1517560265583&s_from=input&ri=0&_sug_=n&type=2&sst0=1517560265687&page=2&ie=utf8&w=01015002&dr=1");
         httpget.setHeader("Host", "weixin.sogou.com");
@@ -76,13 +101,45 @@ public class HtmlUtils {
                 }
             }
         } catch (Throwable e) {
-            logger.error("[HtmlUtils] Throwable.url:" + url, e);
+            if (null == ipPort) {
+                logger.error("[HtmlUtils] Throwable.", e);
+            } else {
+                logger.error("[HtmlUtils] Throwable.IpPort:" + ipPort, e);
+                int size = 1;
+                if (failSize.containsKey(ipPort)) {
+                    size = failSize.get(ipPort) + 1;
+                }
+                failSize.put(ipPort, size);
+                if (size > maxFail) {
+                    setProxy(ipPort.getIp(), ipPort.getPort(), 1);
+                }
+                if (failSize.size() > maxFailSize)
+                    failSize.clear();
+            }
         } finally {
             // 释放连接
             httpClient.close();
             IOUtils.closeQuietly(in);
         }
         return html;
+    }
+
+    public static boolean setProxy(String ip, int port, int type) {
+        logger.info("[HtmlUtils] setProxy,ip:{},port:{},type:{}", ip, port, type);
+
+        if (type == 0) {
+            index.set(0);
+            return proxy.add(new IpPort(ip, port));
+        }
+
+        if (type == 1) {
+            IpPort ipPort = new IpPort(ip, port);
+            index.set(0);
+            failSize.remove(ipPort);
+            return proxy.remove(ipPort);
+        }
+
+        return false;
     }
 
     private static String composeTargetUrl(String url, Map<String,String> parameters) {
@@ -138,5 +195,30 @@ class IpPort {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IpPort ipPort = (IpPort) o;
+
+        if (port != ipPort.port) return false;
+        return ip.equals(ipPort.ip);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31 * ip.hashCode() + port;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "ip='" + ip + '\'' +
+                ", port=" + port +
+                '}';
     }
 }
