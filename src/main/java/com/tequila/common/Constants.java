@@ -1,8 +1,6 @@
 package com.tequila.common;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by wangyudong on 2018/1/18.
@@ -15,10 +13,4 @@ public class Constants {
 
     public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
     public static final Charset UTF8 = Charset.forName("UTF-8");
-
-    public static final List<String> MANAGER_PHONES = new ArrayList<>();
-
-    static {
-        MANAGER_PHONES.add("15210362506");
-    }
 }

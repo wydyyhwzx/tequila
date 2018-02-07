@@ -3,7 +3,6 @@ package com.tequila.service;
 import java.io.IOException;
 import java.util.*;
 
-import com.tequila.common.HtmlUtils;
 import com.tequila.domain.WechartArticle;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -12,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +24,8 @@ public class SougouWechartService {
     private static final String sogouUrl = "http://weixin.sogou.com/weixin";
     private static final int maxRetryNum = 3;
 
+    @Autowired
+    private HttpService httpService;
 
     /**
      * 获取搜狗微信文章列表
@@ -47,7 +49,7 @@ public class SougouWechartService {
             parameters = createParamters(query, page);
         }
 
-        String sougouWechatHtml = HtmlUtils.getHtml(sogouUrl, parameters);
+        String sougouWechatHtml = httpService.get(sogouUrl, parameters);
         if (StringUtils.isBlank(sougouWechatHtml)) {
             return getArticleList(query, page, parameters, retryNum + 1);
         }
@@ -90,21 +92,21 @@ public class SougouWechartService {
      * @return 微信文章html
      * @throws IOException
      */
-    public String getArticleHtml(String url, int retryNum) throws IOException {
+    public String getArticle(String url, int retryNum) throws IOException {
         if (retryNum > maxRetryNum) {
-            logger.info("[SougouWechartService] getArticleHtml retryNum > {}, url:{}", maxRetryNum, url);
+            logger.info("[SougouWechartService] getArticle retryNum > {}, url:{}", maxRetryNum, url);
             return null;
         }
 
-        String wechartArticleHtml = HtmlUtils.getHtml(url, null);
+        String wechartArticleHtml = httpService.get(url, null);
         if (StringUtils.isBlank(wechartArticleHtml)) {
-            return getArticleHtml(url, retryNum + 1);
+            return getArticle(url, retryNum + 1);
         }
 
         Document wechartArticlDoc = Jsoup.parse(wechartArticleHtml);
         Elements content = wechartArticlDoc.select(".rich_media#js_article");
         if (null == content || content.size() == 0) {
-            return getArticleHtml(url, retryNum + 1);
+            return getArticle(url, retryNum + 1);
         }
         String alterContent = wechartArticlDoc.html().replaceAll("data-src", "src");// 将属性data-src替换为src，否则图片不能正常显示
         return alterContent;
@@ -131,21 +133,10 @@ public class SougouWechartService {
 
     public boolean setProxy(String ip, int port, int type) {
         try {
-            return HtmlUtils.setProxy(ip, port, type);
+            return httpService.setProxy(ip, port, type);
         } catch (Exception e) {
             logger.error("[SougouWechartService] setProxy err. ip:" + ip + ",port:" + port, "type:" + type, e);
         }
         return false;
-    }
-
-    public static void main(String[] args) throws Exception{
-        SougouWechartService sougouWechartService = new SougouWechartService();
-        List<WechartArticle> list = sougouWechartService.getArticleList("张靓颖", 1, null, 0);
-        for (WechartArticle wechartArticle: list) {
-            System.out.println(wechartArticle.toString());
-            System.out.println();
-        }
-        /*String article = sougouWechartService.getArticleHtml("http://mp.weixin.qq.com/s?src=11&timestamp=1517902182&ver=681&signature=kntb0nqHRT0mNi9YI0pjKGPJ*somPS6Q3y8OQ0MwbhiN*iwbsQBTmMTjwAxENOCoypLfrVNoJHEveD8Exemevhxyg6TENwreK22C**B8L96oS7JRsr-Tyaa4DFtOvJ6I&new=1", 0);
-        System.out.println(article == null ? "null" : article);*/
     }
 }

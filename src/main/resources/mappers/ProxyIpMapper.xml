@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tequila.mapper.ProxyIpMapper">
+
+    <resultMap id="result" type="com.tequila.model.ProxyIpDO">
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="port" property="port" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="columns">
+        ip,port
+    </sql>
+
+    <insert id="insert" parameterType="com.tequila.model.ProxyIpDO" useGeneratedKeys="false">
+        INSERT INTO tequila_proxy_ip
+        (ip,port)
+        VALUES
+        (
+          #{ip},
+          #{port}
+        )
+    </insert>
+
+    <delete id="delete" parameterType="com.tequila.model.ProxyIpDO" >
+        DELETE
+        FROM tequila_proxy_ip
+        WHERE ip=#{ip} AND port=#{port}
+    </delete>
+
+    <select id="all" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_proxy_ip
+    </select>
+</mapper>

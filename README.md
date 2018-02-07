@@ -19,7 +19,7 @@ tequila-1.0.0.jar 修改为jar文件具体路径/home/tequila/deploy/tequila-1.0
 2.1数据库名称
 tequila
 2.2用户表建表sql
-CCREATE TABLE `tequila_user` (
+CREATE TABLE `tequila_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gmt_create` datetime NOT NULL,
   `gmt_modified` datetime NOT NULL,
@@ -41,6 +41,12 @@ CCREATE TABLE `tequila_user` (
   UNIQUE KEY `uk_name` (`name`),
   UNIQUE KEY `uk_phone` (`phone`),
   UNIQUE KEY `uk_mail` (`mail`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+2.3高匿代理ip表sql
+CREATE TABLE tequila_proxy_ip (
+  ip varchar(20) NOT NULL,
+  port int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
 3接口
@@ -141,7 +147,7 @@ url:详情页url地址
 抓取是否返回错误码 1:系统错误
 成功返回详情html 设置响应头：Content-Type: text/html; charset=UTF-8
 
-3.12设置高匿代理接口 设置权限登录用户的手机号在白名单里才可用，目前是写死了我的手机号，没放数据库
+3.12设置高匿代理接口 设置权限登录用户的手机号在配置文件的manager.phone
 url:/search/setProxy
 method:GET
 参数:
@@ -149,3 +155,5 @@ ip:代理ip
 port:代理port
 type:类型 0：新增代理， 1：删除代理
 返回结果result：
+没有权限返回code 4:没有访问权限
+否则返回true/false

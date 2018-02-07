@@ -8,6 +8,7 @@ import com.tequila.domain.WechartArticle;
 import com.tequila.model.UserDO;
 import com.tequila.service.SougouWechartService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,6 +26,8 @@ import java.util.Map;
 public class SearchController {
     @Resource
     private SougouWechartService sougouWechartService;
+    @Value("${manager.phone}")
+    private String managerPhone;
 
     @RequestMapping(value = "/keyword/list", method = RequestMethod.GET)
     @ResponseBody
@@ -38,7 +41,7 @@ public class SearchController {
     @RequestMapping(value = "/keyword/info", method = RequestMethod.GET)
     @ResponseBody
     public Result keywordInfo(@RequestParam String url, HttpServletResponse response) throws Exception {
-        String articleHtml = sougouWechartService.getArticleHtml(url, 0);
+        String articleHtml = sougouWechartService.getArticle(url, 0);
         if (StringUtils.isBlank(articleHtml)) {
             Result result = Result.fail(StatusCode.SYSTEM_ERROR);
             result.setDescription("获取详情失败，请稍后在试");
@@ -56,7 +59,7 @@ public class SearchController {
     @ResponseBody
     public Result<Boolean> setProxy(@RequestParam String ip, @RequestParam int port, @RequestParam int type) throws Exception {
         UserDO userDO = UserUtil.getUser();
-        if (null == userDO || !Constants.MANAGER_PHONES.contains(userDO.getPhone())) {
+        if (null == userDO || !managerPhone.contains(userDO.getPhone())) {
             return Result.fail(StatusCode.NO_ACCESS_ERROR);
         }
 
