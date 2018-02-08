@@ -35,11 +35,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpService {
     private static Logger logger = LoggerFactory.getLogger(HttpService.class);
     private static final String UTF8 = "utf-8";
-    private static List<ProxyIpDO> proxy = Lists.newCopyOnWriteArrayList();
-    private static AtomicInteger index = new AtomicInteger(0);
-    private static Map<ProxyIpDO,Integer> failSize = new ConcurrentHashMap<>();
     private static final int maxFail = 30;
     private static final int maxFailSize = 1000;
+
+    private List<ProxyIpDO> proxy = Lists.newCopyOnWriteArrayList();
+    private AtomicInteger index = new AtomicInteger(0);
+    private Map<ProxyIpDO,Integer> failSize = new ConcurrentHashMap<>();
+    private Map<String,String> headeres = new ConcurrentHashMap<>();
+    private RequestConfig.Builder builder;
 
     @Autowired
     private ProxyIpMapper proxyIpMapper;
@@ -50,6 +53,20 @@ public class HttpService {
         if (null != temp && temp.size() > 0) {
             proxy.addAll(temp);
         }
+
+        headeres.put("Referer", "http://weixin.sogou.com/weixin?oq=&query=%E6%9D%8E%E5%AE%87%E6%98%A5&_sug_type_=&sut=596&lkt=1%2C1517560265583%2C1517560265583&s_from=input&ri=0&_sug_=n&type=2&sst0=1517560265687&page=2&ie=utf8&w=01015002&dr=1");
+        headeres.put("Host", "weixin.sogou.com");
+        headeres.put("Pragma", "no-cache");
+        headeres.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        headeres.put("Accept-Language:", "zh-cn");
+        headeres.put("Accept-Encoding:", "gzip, deflate");
+        headeres.put("Cache-Control:", "no-cache");
+        headeres.put("Upgrade-Insecure-Requests:", "1");
+        headeres.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6");
+        headeres.put("Cookie", "SUID=D02F0E7A232C940A000000005A6064D2; JSESSIONID=aaamdiu-7Q0_scZArLCew; ABTEST=6|1516266706|v1; weixinIndexVisited=1; sct=1; SNUID=CA3415611A1F7F0BEEAEB6181B9372ED; IPLOC=CN1100; SUID=D02F0E7A541C940A000000005A6064D2; SUV=000D174E7A0E2FD05A6064D29C9B8679");
+
+        builder = RequestConfig.custom();
+        builder.setSocketTimeout(3000).setConnectTimeout(3000).setConnectionRequestTimeout(3000);
     }
 
     public String get(String url, Map<String,String> parameters) throws IOException {
@@ -58,31 +75,23 @@ public class HttpService {
         HttpGet httpget = new HttpGet(composeTargetUrl(url, parameters));
 
         ProxyIpDO proxyIpDO = null;
-        RequestConfig.Builder builder = RequestConfig.custom();
         if (proxy.size() > 0) {
             int i = index.get() % proxy.size();
             index.set(i + 1);
             proxyIpDO = proxy.get(i);
             HttpHost httpProxy = new HttpHost(proxyIpDO.getIp(), proxyIpDO.getPort());
             builder.setProxy(httpProxy);
+        } else {
+            builder.setProxy(null);
         }
-        RequestConfig requestConfig = builder
-                .setSocketTimeout(3000)
-                .setConnectTimeout(3000)
-                .setConnectionRequestTimeout(3000)
-                .build();
+        RequestConfig requestConfig = builder.build();
 
         httpget.setConfig(requestConfig);
-        httpget.setHeader("Referer", "http://weixin.sogou.com/weixin?oq=&query=%E6%9D%8E%E5%AE%87%E6%98%A5&_sug_type_=&sut=596&lkt=1%2C1517560265583%2C1517560265583&s_from=input&ri=0&_sug_=n&type=2&sst0=1517560265687&page=2&ie=utf8&w=01015002&dr=1");
-        httpget.setHeader("Host", "weixin.sogou.com");
-        httpget.setHeader("Pragma", "no-cache");
-        httpget.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        httpget.setHeader("Accept-Language:", "zh-cn");
-        httpget.setHeader("Accept-Encoding:", "gzip, deflate");
-        httpget.setHeader("Cache-Control:", "no-cache");
-        httpget.setHeader("Upgrade-Insecure-Requests:", "1");
-        httpget.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/604.5.6 (KHTML, like Gecko) Version/11.0.3 Safari/604.5.6");
-        httpget.setHeader("Cookie", "SUID=D02F0E7A232C940A000000005A6064D2; JSESSIONID=aaamdiu-7Q0_scZArLCew; ABTEST=6|1516266706|v1; weixinIndexVisited=1; sct=1; SNUID=CA3415611A1F7F0BEEAEB6181B9372ED; IPLOC=CN1100; SUID=D02F0E7A541C940A000000005A6064D2; SUV=000D174E7A0E2FD05A6064D29C9B8679");
+        if (headeres.size() > 0) {
+            for (Map.Entry<String,String> entry : headeres.entrySet()) {
+                httpget.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
 
         InputStream in = null;
         try {
@@ -95,6 +104,10 @@ public class HttpService {
                     html = IOUtils.toString(in, UTF8);
                 }
             }
+
+            if (StringUtils.isNotBlank(html) && html.contains("您的访问过于频繁") && html.contains("您的访问出错了返回首页")) {
+                throw new RuntimeException("访问过于频繁");
+            }
         } catch (Throwable e) {
             if (null == proxyIpDO) {
                 logger.error("[HttpService] Throwable.", e);
@@ -106,7 +119,7 @@ public class HttpService {
                 }
                 failSize.put(proxyIpDO, size);
                 if (size > maxFail) {
-                    setProxy(proxyIpDO.getIp(), proxyIpDO.getPort(), 1);
+                    setProxy(proxyIpDO.getIp() + ":" + proxyIpDO.getPort(), 1);
                 }
                 if (failSize.size() > maxFailSize)
                     failSize.clear();
@@ -119,12 +132,13 @@ public class HttpService {
         return html;
     }
 
-    public boolean setProxy(String ip, int port, int type) {
-        logger.info("[HttpService] setProxy,ip:{},port:{},type:{}", ip, port, type);
+    public boolean setProxy(String ipPort, int type) {
+        logger.info("[HttpService] setProxy,ipPort:{},type:{}", ipPort, type);
 
+        String[] spilt = ipPort.split(":");
         ProxyIpDO proxyIpDO = new ProxyIpDO();
-        proxyIpDO.setIp(ip);
-        proxyIpDO.setPort(port);
+        proxyIpDO.setIp(spilt[0]);
+        proxyIpDO.setPort(Integer.parseInt(spilt[1]));
 
         if (type == 0) {
             proxyIpMapper.insert(proxyIpDO);
@@ -140,6 +154,29 @@ public class HttpService {
         }
 
         return false;
+    }
+
+    public boolean reloadProxy() {
+        logger.info("[HttpService] reloadProxy");
+        List<ProxyIpDO> temp = proxyIpMapper.all();
+        index.set(0);
+        failSize.clear();
+        proxy.clear();
+        if (null != temp && temp.size() > 0) {
+            return proxy.addAll(temp);
+        }
+
+        return true;
+    }
+
+    public boolean setSougouHeader(String name, String value) {
+        if (StringUtils.isBlank(value)) {
+            headeres.remove(name);
+        } else {
+            headeres.put(name, value);
+        }
+
+        return true;
     }
 
     private String composeTargetUrl(String url, Map<String,String> parameters) {

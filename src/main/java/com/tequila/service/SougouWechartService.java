@@ -130,13 +130,4 @@ public class SougouWechartService {
         parameters.put("w", "01019900");
         return parameters;
     }
-
-    public boolean setProxy(String ip, int port, int type) {
-        try {
-            return httpService.setProxy(ip, port, type);
-        } catch (Exception e) {
-            logger.error("[SougouWechartService] setProxy err. ip:" + ip + ",port:" + port, "type:" + type, e);
-        }
-        return false;
-    }
 }

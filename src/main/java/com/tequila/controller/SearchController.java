@@ -6,6 +6,7 @@ import com.tequila.common.UserUtil;
 import com.tequila.domain.Result;
 import com.tequila.domain.WechartArticle;
 import com.tequila.model.UserDO;
+import com.tequila.service.HttpService;
 import com.tequila.service.SougouWechartService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,8 @@ import java.util.Map;
 public class SearchController {
     @Resource
     private SougouWechartService sougouWechartService;
+    @Resource
+    private HttpService httpService;
     @Value("${manager.phone}")
     private String managerPhone;
 
@@ -57,12 +60,34 @@ public class SearchController {
 
     @RequestMapping(value = "/setProxy", method = RequestMethod.GET)
     @ResponseBody
-    public Result<Boolean> setProxy(@RequestParam String ip, @RequestParam int port, @RequestParam int type) throws Exception {
+    public Result<Boolean> setProxy(@RequestParam String ipPort, @RequestParam int type) throws Exception {
         UserDO userDO = UserUtil.getUser();
         if (null == userDO || !managerPhone.contains(userDO.getPhone())) {
             return Result.fail(StatusCode.NO_ACCESS_ERROR);
         }
 
-        return Result.success(sougouWechartService.setProxy(ip, port, type));
+        return Result.success(httpService.setProxy(ipPort, type));
+    }
+
+    @RequestMapping(value = "/reloadProxy", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<Boolean> reloadProxy() throws Exception {
+        UserDO userDO = UserUtil.getUser();
+        if (null == userDO || !managerPhone.contains(userDO.getPhone())) {
+            return Result.fail(StatusCode.NO_ACCESS_ERROR);
+        }
+
+        return Result.success(httpService.reloadProxy());
+    }
+
+    @RequestMapping(value = "/setSougouHeader", method = RequestMethod.GET)
+    @ResponseBody
+    public Result<Boolean> setSougouHeader(@RequestParam String name, @RequestParam(required = false, defaultValue = "") String value) {
+        UserDO userDO = UserUtil.getUser();
+        if (null == userDO || !managerPhone.contains(userDO.getPhone())) {
+            return Result.fail(StatusCode.NO_ACCESS_ERROR);
+        }
+
+        return Result.success(httpService.setSougouHeader(name, value));
     }
 }

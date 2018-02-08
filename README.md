@@ -151,9 +151,25 @@ url:详情页url地址
 url:/search/setProxy
 method:GET
 参数:
-ip:代理ip
-port:代理port
+ipPort: 代理ip:代理port
 type:类型 0：新增代理， 1：删除代理
+返回结果result：
+没有权限返回code 4:没有访问权限
+否则返回true/false
+
+3.13重新加载高匿代理接口 设置权限登录用户的手机号在配置文件的manager.phone
+url:/search/reloadProxy
+method:GET
+参数:无
+返回结果result：
+没有权限返回code 4:没有访问权限
+否则返回true/false
+
+3.14设置搜狗接口调用的request header，伪造浏览器、cookie等信息接口 设置权限登录用户的手机号在配置文件的manager.phone
+url:/search/setSougouHeader
+参数:
+name:header名称
+value:header指，为空或不传代表删除此请求头
 返回结果result：
 没有权限返回code 4:没有访问权限
 否则返回true/false
