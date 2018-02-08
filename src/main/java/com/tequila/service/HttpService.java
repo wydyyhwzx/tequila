@@ -1,6 +1,7 @@
 package com.tequila.service;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.tequila.common.TequilaException;
 import com.tequila.mapper.ProxyIpMapper;
 import com.tequila.model.ProxyIpDO;
 import org.apache.commons.io.IOUtils;
@@ -8,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,7 +41,7 @@ public class HttpService {
     private static final int maxFail = 30;
     private static final int maxFailSize = 1000;
 
-    private List<ProxyIpDO> proxy = Lists.newCopyOnWriteArrayList();
+    private Set<ProxyIpDO> proxy = Sets.newConcurrentHashSet();
     private AtomicInteger index = new AtomicInteger(0);
     private Map<ProxyIpDO,Integer> failSize = new ConcurrentHashMap<>();
     private Map<String,String> headeres = new ConcurrentHashMap<>();
@@ -50,9 +53,11 @@ public class HttpService {
     @PostConstruct
     public void init() {
         List<ProxyIpDO> temp = proxyIpMapper.all();
+        logger.info("[HttpService] proxy db size:" + temp.size());
         if (null != temp && temp.size() > 0) {
             proxy.addAll(temp);
         }
+        logger.info("[HttpService] proxy size:" + proxy.size());
 
         headeres.put("Referer", "http://weixin.sogou.com/weixin?oq=&query=%E6%9D%8E%E5%AE%87%E6%98%A5&_sug_type_=&sut=596&lkt=1%2C1517560265583%2C1517560265583&s_from=input&ri=0&_sug_=n&type=2&sst0=1517560265687&page=2&ie=utf8&w=01015002&dr=1");
         headeres.put("Host", "weixin.sogou.com");
@@ -66,7 +71,7 @@ public class HttpService {
         headeres.put("Cookie", "SUID=D02F0E7A232C940A000000005A6064D2; JSESSIONID=aaamdiu-7Q0_scZArLCew; ABTEST=6|1516266706|v1; weixinIndexVisited=1; sct=1; SNUID=CA3415611A1F7F0BEEAEB6181B9372ED; IPLOC=CN1100; SUID=D02F0E7A541C940A000000005A6064D2; SUV=000D174E7A0E2FD05A6064D29C9B8679");
 
         builder = RequestConfig.custom();
-        builder.setSocketTimeout(3000).setConnectTimeout(3000).setConnectionRequestTimeout(3000);
+        builder.setSocketTimeout(3000).setConnectTimeout(3000).setConnectionRequestTimeout(3000).setCookieSpec(CookieSpecs.IGNORE_COOKIES);
     }
 
     public String get(String url, Map<String,String> parameters) throws IOException {
@@ -78,7 +83,7 @@ public class HttpService {
         if (proxy.size() > 0) {
             int i = index.get() % proxy.size();
             index.set(i + 1);
-            proxyIpDO = proxy.get(i);
+            proxyIpDO = proxy.toArray(new ProxyIpDO[0])[i];
             HttpHost httpProxy = new HttpHost(proxyIpDO.getIp(), proxyIpDO.getPort());
             builder.setProxy(httpProxy);
         } else {
@@ -104,9 +109,14 @@ public class HttpService {
                     html = IOUtils.toString(in, UTF8);
                 }
             }
-
-            if (StringUtils.isNotBlank(html) && html.contains("您的访问过于频繁") && html.contains("您的访问出错了返回首页")) {
-                throw new RuntimeException("访问过于频繁");
+            if (StringUtils.isNotBlank(html) && html.contains("用户您好，您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证")) {
+                throw new TequilaException(1, "Request Limit", "Request Limit");
+            }
+        } catch (TequilaException e) {
+            if (null == proxyIpDO) {
+                logger.warn("[HttpService] TequilaException. message:" + e.getMessage());
+            } else {
+                logger.warn("[HttpService] TequilaException. ProxyIpDO:{}, message:{}", proxyIpDO.toString(), e.getMessage());
             }
         } catch (Throwable e) {
             if (null == proxyIpDO) {
@@ -159,11 +169,13 @@ public class HttpService {
     public boolean reloadProxy() {
         logger.info("[HttpService] reloadProxy");
         List<ProxyIpDO> temp = proxyIpMapper.all();
+        logger.info("[HttpService] proxy db size:" + temp.size());
         index.set(0);
         failSize.clear();
         proxy.clear();
         if (null != temp && temp.size() > 0) {
-            return proxy.addAll(temp);
+            proxy.addAll(temp);
+            logger.info("[HttpService] proxy size:" + proxy.size());
         }
 
         return true;

@@ -31,5 +31,6 @@
         SELECT
         <include refid="columns"/>
         FROM tequila_proxy_ip
+        limit 1000
     </select>
 </mapper>
