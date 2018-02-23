@@ -22,6 +22,7 @@ import java.util.Map;
 /**
  * Created by wangyudong on 2018/2/6.
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/search")
 public class SearchController {
