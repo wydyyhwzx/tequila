@@ -6,7 +6,9 @@ import com.tequila.model.UserDO;
 import com.tequila.service.UserService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+    private static final long profileMaxSize = 5000000l;
     @Resource
     private UserService userService;
     @Value("${host}")
@@ -218,5 +221,21 @@ public class UserController {
         Result result = Result.fail(StatusCode.PARAM_ERROR);
         result.setDescription("验证码类型不对");
         return result;
+    }
+
+    @PostMapping(value = "/profileUpload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseBody
+    public Result<Map<String,String>> profileUpload(@RequestParam("profile") MultipartFile profile) {
+        if (profile.isEmpty() || StringUtils.isBlank(profile.getOriginalFilename())) {
+            return Result.fail(StatusCode.PARAM_ERROR.getCode(), "图片不能为空", "图片不能为空");
+        }
+        if (!profile.getContentType().contains("image")) {
+            return Result.fail(StatusCode.PARAM_ERROR.getCode(), "文件不是图片", "文件不是图片");
+        }
+        if (profile.getSize() > profileMaxSize) {
+            return Result.fail(StatusCode.PARAM_ERROR.getCode(), "图片大小超过5M", "图片大小超过5M");
+        }
+
+        return userService.profileUpload(profile);
     }
 }

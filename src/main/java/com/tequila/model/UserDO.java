@@ -63,6 +63,10 @@ public class UserDO {
     * */
     private Date tokenExpire;
     /*
+    *  用户头像
+    * */
+    private String profile;
+    /*
     *  扩展字段，json格式
     * */
     private String extend;
@@ -189,6 +193,14 @@ public class UserDO {
 
     public void setExtend(String extend) {
         this.extend = extend;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
     }
 
     public ObjectNode extendJsonVaule() {

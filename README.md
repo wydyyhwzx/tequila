@@ -173,3 +173,11 @@ value:header指，为空或不传代表删除此请求头
 返回结果result：
 没有权限返回code 4:没有访问权限
 否则返回true/false
+
+3.15头像上传接口
+url:/user/profileUpload
+method:POST
+参数:
+profile: 图片
+返回结果result：
+{"url":"http://www.pivotal-china.com:8080/profile/1profile.jpeg"}

@@ -4,14 +4,18 @@ import com.tequila.common.*;
 import com.tequila.domain.Result;
 import com.tequila.mapper.UserMapper;
 import com.tequila.model.UserDO;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wangyudong on 2018/1/18.
@@ -28,6 +32,8 @@ public class UserService {
     private String host;
     @Value("${server.port}")
     private String port;
+    @Value("${static.path}")
+    private String staticPath;
 
     public Result<UserDO> register(String name, String phone, String mail, String password) throws Exception{
         List<UserDO> userDOS = userMapper.listByNameOrPhoneOrMail(name, phone, mail);
@@ -161,5 +167,34 @@ public class UserService {
         update.setPassword(newPassword);
         transactionService.findPassword(update, mail, "Tequila 密码找回", "您的新密码为：" + newPassword + "，请尽快修改，以免密码泄漏");
         return Result.success();
+    }
+
+    public Result<Map<String,String>> profileUpload(MultipartFile profile) {
+        // 获取图片的文件名
+        String fileName = profile.getOriginalFilename();
+        // 获取图片的扩展名
+        String extensionName = StringUtils.substringAfter(fileName, ".");
+        // 保存图片的文件名 = 用户ID+"profile."+图片扩展名
+        int uid = UserUtil.getUser().getId();
+        String saveFileName = uid + "profile." + extensionName;
+        // 保存文件的路径
+        String saveFilePath = staticPath + Constants.profilePath;
+        // 文件URL
+        StringBuilder sb = new StringBuilder("http://");
+        sb.append(host);
+        if (port != null && !port.equals("80"))
+            sb.append(":").append(port);
+        sb.append("/").append(Constants.profilePath).append(saveFileName);
+        String url = sb.toString();
+
+        try {
+            transactionService.profileUpload(saveFilePath, saveFileName, url, uid, profile);
+            Map<String,String> result = new HashMap<>(1);
+            result.put("url",url);
+            return Result.success(result);
+        } catch (Exception e) {
+            logger.error("[UserService] profileUpload err", e);
+            return Result.fail(StatusCode.SYSTEM_ERROR);
+        }
     }
 }

@@ -18,13 +18,14 @@
         <result column="token" property="token" jdbcType="VARCHAR"/>
         <result column="token_expire" property="tokenExpire" jdbcType="TIMESTAMP"/>
         <result column="extend" property="extend" jdbcType="VARCHAR"/>
+        <result column="profile" property="profile" jdbcType="VARCHAR"/>
         <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP"/>
         <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="columns">
         id,name,real_name,phone,mail,verify_status,member_type,card_type,
-        card_id,media_type,media_id,token,token_expire,extend,gmt_create,gmt_modified
+        card_id,media_type,media_id,token,token_expire,extend,profile,gmt_create,gmt_modified
     </sql>
 
     <insert id="insert" parameterType="com.tequila.model.UserDO" useGeneratedKeys="true" keyProperty="id">
@@ -93,6 +94,9 @@
             </if>
             <if test="tokenExpire != null">
                 token_expire = #{tokenExpire},
+            </if>
+            <if test="profile != null">
+                profile = #{profile},
             </if>
             <if test="extend != null">
                 extend = #{extend},

@@ -13,4 +13,6 @@ public class Constants {
 
     public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
     public static final Charset UTF8 = Charset.forName("UTF-8");
+
+    public static final String profilePath = "profile/";
 }
