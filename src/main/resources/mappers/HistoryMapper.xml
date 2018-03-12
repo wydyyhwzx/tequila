@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tequila.mapper.HistoryMapper">
+
+    <resultMap id="result" type="com.tequila.model.HistoryDO">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="keyword" property="keyword" jdbcType="VARCHAR"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="monitor" property="monitor" jdbcType="INTEGER"/>
+        <result column="extend" property="extend" jdbcType="VARCHAR"/>
+        <result column="gmt_create" property="gmtCreate" jdbcType="TIMESTAMP"/>
+        <result column="gmt_modified" property="gmtModified" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="columns">
+        id,user_id,keyword,url,monitor,extend,gmt_create,gmt_modified
+    </sql>
+
+    <insert id="insert" parameterType="com.tequila.model.HistoryDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tequila_history
+        (user_id,keyword,url,monitor,extend,gmt_create,gmt_modified)
+        VALUES
+        (
+          #{userId},
+          #{keyword},
+          #{url},
+          #{monitor},
+          #{extend},
+          now(),
+          now()
+        )
+    </insert>
+
+    <update id="update" parameterType="com.tequila.model.HistoryDO">
+        update tequila_history
+        <set>
+            <if test="url != null">
+                url = #{url},
+            </if>
+            <if test="monitor != null">
+                monitor = #{monitor},
+            </if>
+            <if test="extend != null">
+                extend = #{extend},
+            </if>
+            gmt_modified = now()
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="findByUserIdAndKeyword" parameterType="map" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_history
+        WHERE user_id=#{userId} AND keyword=#{keyword}
+    </select>
+
+    <select id="listByUserId" parameterType="map" resultMap="result">
+        SELECT
+        <include refid="columns"/>
+        FROM tequila_history
+        WHERE user_id=#{userId}
+        ORDER BY monitor DESC,gmt_modified DESC
+        LIMIT #{startRow},#{pageSize}
+    </select>
+</mapper>

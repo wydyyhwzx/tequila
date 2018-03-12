@@ -74,31 +74,44 @@ public class HttpService {
         builder.setSocketTimeout(3000).setConnectTimeout(3000).setConnectionRequestTimeout(3000).setCookieSpec(CookieSpecs.IGNORE_COOKIES);
     }
 
-    public String get(String url, Map<String,String> parameters) throws IOException {
-        String html = "";
-        CloseableHttpClient httpClient = HttpClients.createDefault();// 创建httpClient对象
+    public String getArticleList(String url, Map<String,String> parameters) throws IOException {
+        String html;
         HttpGet httpget = new HttpGet(composeTargetUrl(url, parameters));
-
-        ProxyIpDO proxyIpDO = null;
-        if (proxy.size() > 0) {
-            int i = index.get() % proxy.size();
-            index.set(i + 1);
-            proxyIpDO = proxy.toArray(new ProxyIpDO[0])[i];
-            HttpHost httpProxy = new HttpHost(proxyIpDO.getIp(), proxyIpDO.getPort());
-            builder.setProxy(httpProxy);
-        } else {
-            builder.setProxy(null);
-        }
+        ProxyIpDO proxyIpDO = buildProxy();
         RequestConfig requestConfig = builder.build();
-
         httpget.setConfig(requestConfig);
+
         if (headeres.size() > 0) {
             for (Map.Entry<String,String> entry : headeres.entrySet()) {
                 httpget.setHeader(entry.getKey(), entry.getValue());
             }
         }
 
+        html = execute(httpget, proxyIpDO);
+        if (StringUtils.isNotBlank(html) && html.contains("用户您好，您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证")) {
+            if (null == proxyIpDO) {
+                logger.warn("[HttpService] Request Limit");
+            } else {
+                logger.warn("[HttpService] Request Limit. ProxyIpDO:{}", proxyIpDO.toString());
+            }
+            html = "";
+        }
+        return html;
+    }
+
+    public String getArticle(String url) throws IOException {
+        HttpGet httpget = new HttpGet(url);
+        ProxyIpDO proxyIpDO = buildProxy();
+        RequestConfig requestConfig = builder.build();
+        httpget.setConfig(requestConfig);
+
+        return execute(httpget, proxyIpDO);
+    }
+
+    private String execute(HttpGet httpget, ProxyIpDO proxyIpDO) throws IOException{
+        CloseableHttpClient httpClient = HttpClients.createDefault();// 创建httpClient对象
         InputStream in = null;
+        String html = "";
         try {
             CloseableHttpResponse responce = httpClient.execute(httpget);
             int code = responce.getStatusLine().getStatusCode();
@@ -108,15 +121,6 @@ public class HttpService {
                     in = entity.getContent();
                     html = IOUtils.toString(in, UTF8);
                 }
-            }
-            if (StringUtils.isNotBlank(html) && html.contains("用户您好，您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证")) {
-                throw new TequilaException(1, "Request Limit", "Request Limit");
-            }
-        } catch (TequilaException e) {
-            if (null == proxyIpDO) {
-                logger.warn("[HttpService] TequilaException. message:" + e.getMessage());
-            } else {
-                logger.warn("[HttpService] TequilaException. ProxyIpDO:{}, message:{}", proxyIpDO.toString(), e.getMessage());
             }
         } catch (Throwable e) {
             if (null == proxyIpDO) {
@@ -139,7 +143,23 @@ public class HttpService {
             httpClient.close();
             IOUtils.closeQuietly(in);
         }
+
         return html;
+    }
+
+    private ProxyIpDO buildProxy() {
+        ProxyIpDO proxyIpDO = null;
+        if (proxy.size() > 0) {
+            int i = index.get() % proxy.size();
+            index.set(i + 1);
+            proxyIpDO = proxy.toArray(new ProxyIpDO[0])[i];
+            HttpHost httpProxy = new HttpHost(proxyIpDO.getIp(), proxyIpDO.getPort());
+            builder.setProxy(httpProxy);
+        } else {
+            builder.setProxy(null);
+        }
+
+        return proxyIpDO;
     }
 
     public boolean setProxy(String ipPort, int type) {

@@ -49,7 +49,7 @@ public class SougouWechartService {
             parameters = createParamters(query, page);
         }
 
-        String sougouWechatHtml = httpService.get(sogouUrl, parameters);
+        String sougouWechatHtml = httpService.getArticleList(sogouUrl, parameters);
         if (StringUtils.isBlank(sougouWechatHtml)) {
             return getArticleList(query, page, parameters, retryNum + 1);
         }
@@ -98,7 +98,7 @@ public class SougouWechartService {
             return null;
         }
 
-        String wechartArticleHtml = httpService.get(url, null);
+        String wechartArticleHtml = httpService.getArticle(url);
         if (StringUtils.isBlank(wechartArticleHtml)) {
             return getArticle(url, retryNum + 1);
         }

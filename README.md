@@ -136,7 +136,7 @@ method:GET
 query:关键词
 page:页数，不传默认1
 返回结果result：
-list:[WechartArticle]
+{"list":[WechartArticle]}
 
 3.11关键词搜索详情接口
 url:/search/keyword/info
@@ -181,3 +181,20 @@ method:POST
 profile: 图片
 返回结果result：
 {"url":"http://www.pivotal-china.com:8080/profile/1profile.jpeg"}
+
+3.16获取搜索历史接口
+url:/search/keyword/history
+method:GET
+参数:
+page：页数，不传默认1
+pageSize：每页条数，不传默认20
+返回结果result：
+{"list":[HistoryDO]}
+
+3.17增加关键词监控接口
+url:/search/keyword/monitor
+method:POST
+参数:
+keyword：关键词
+url：文章链接
+返回结果result：无
